@@ -1,9 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template,  url_for
+
 from livereload import Server
 import mysql.connector
 import os
 
 app = Flask(__name__)
+
 
 # Database configuration
 db_config = {
@@ -15,7 +17,7 @@ db_config = {
 
 @app.route("/")
 def home():
-    return "This is the home  hgpage reloaded!"
+    return render_template("index.html")
 
 @app.route("/testdb")
 def testdb():
@@ -34,4 +36,5 @@ if __name__ == "__main__":
     server = Server(app.wsgi_app)
     server.watch("**/*.py")  # Watch Python files for changes
     server.watch("templates/*.html")
+    server.watch("static/*.*")
     server.serve(host="0.0.0.0", port=5000, debug=True) 
