@@ -4,6 +4,9 @@ FROM python:3.9
 # Set the working directory in the container
 WORKDIR /app
 
+# Upgrade pip before installing dependencies
+RUN pip install --upgrade pip
+
 # Copy the current directory contents into the container at /app
 COPY . .
 
