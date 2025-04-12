@@ -19,6 +19,10 @@ db_config = {
 def home():
     return render_template("index.html")
 
+@app.route("/login")
+def login():
+    return render_template("loginandsinup.html")
+
 @app.route("/testdb")
 def testdb():
     try:
