@@ -1,19 +1,15 @@
 from flask import Flask, jsonify, render_template,  url_for
 
 from livereload import Server
-import mysql.connector
+from flask_sqlalchemy import SQLAlchemy
+from config import Config
 import os
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
+db = SQLAlchemy(app)
 
-# Database configuration
-db_config = {
-    "host": os.getenv("DB_HOST", "mariadb"),
-    "user": os.getenv("DB_USER", "root"),
-    "password": os.getenv("DB_PASSWORD", "rootpassword"),
-    "database": os.getenv("DB_DATABASE", "cddb"),
-}
 
 @app.route("/")
 def home():
