@@ -15,7 +15,7 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User {self.username}>"
-    
+
 class Doctor(db.Model):
     __tablename__ = 'doctors'
 
@@ -27,7 +27,7 @@ class Doctor(db.Model):
 
     def __repr__(self):
         return f"<Doctor {self.name}>"
-    
+
 class Disease(db.Model):
     __tablename__ = 'diseases'
 
