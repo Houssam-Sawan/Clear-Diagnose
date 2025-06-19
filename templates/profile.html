@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>User Profile</h1>
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>{{ user.username }}</h2>
+        <p>Email: {{ user.email }}</p>
+    </div>
+    <div class="profile-details">
+        <h3>Profile Details</h3>
+        <p>Joined on: {{ user.joined_date.strftime('%Y-%m-%d') }}</p>
+        <p>Last login: {{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+    <div class="profile-actions">
+        <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}
