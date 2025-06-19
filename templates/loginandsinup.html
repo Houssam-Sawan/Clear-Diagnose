@@ -12,7 +12,7 @@
     rel='stylesheet'>
 
     <!--Custom CSS-->
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 
 </head>
 
@@ -101,7 +101,7 @@
     </div>
 
     <!--Script.js-->
-    <script src="login.js"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 
 </html> 

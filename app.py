@@ -1,15 +1,14 @@
-from flask import Flask, jsonify, render_template,  url_for
+from flask import Flask, jsonify, render_template,  url_for, request
 
 from livereload import Server
-from flask_sqlalchemy import SQLAlchemy
 from config import Config
+from models import *  # Import All models here
 import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-db = SQLAlchemy(app)
-
+db.init_app(app)
 
 @app.route("/")
 def home():
@@ -22,17 +21,15 @@ def login():
 @app.route("/testdb")
 def testdb():
     try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor()
-        cursor.execute("SELECT 'Connected to MariaDB!'")
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return jsonify({"message": result[0]})
-    except mysql.connector.Error as err:
-        return jsonify({"error": str(err)})
+        db.create_all()  # Ensure the database and tables are created
+        return jsonify({"message": "Database connection successful!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
+    # Ensure the instance folder exists
+    with app.app_context():  # Needed for DB operations
+        db.create_all()      # Creates the database and tables
     server = Server(app.wsgi_app)
     server.watch("**/*.py")  # Watch Python files for changes
     server.watch("templates/*.html")
