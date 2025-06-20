@@ -40,7 +40,17 @@
 
         <div class="form-box login">
             <h2 class="title animation" style="--i:0; --j:21">Login</h2>
-            <form action="#">
+            <form action="{{ url_for('login') }}" method="post">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, msg in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ msg }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
 
                 <div class="input-box animation" style="--i:1; --j:22">
                     <input type="text" required>
@@ -77,23 +87,33 @@
 
             <h2 class="title animation" style="--i:17; --j:0">Sign Up</h2>
 
-            <form action="#">
+            <form action="{{ url_for('signup') }}" method="post">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, msg in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ msg }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
 
                 <div class="input-box animation" style="--i:18; --j:1">
-                    <input type="text" required>
-                    <label for="">Username</label>
+                    <input name="new_username" type="text" required>
+                    <label for="new_username">Username</label>
                     <i class='bx bxs-user'></i>
                 </div>
 
                 <div class="input-box animation" style="--i:19; --j:2">
-                    <input type="email" required>
-                    <label for="">Email</label>
+                    <input name="new_email" type="email" required>
+                    <label for="new_email">Email</label>
                     <i class='bx bxs-envelope'></i>
                 </div>
 
                 <div class="input-box animation" style="--i:20; --j:3">
-                    <input type="password" required>
-                    <label for="">Password</label>
+                    <input name="new_password" type="password" required>
+                    <label for="new_password">Password</label>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
 

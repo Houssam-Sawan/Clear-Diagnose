@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -12,6 +13,14 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    def set_password(self, password):
+        """Set the password hash for the user."""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Check the provided password against the stored hash."""
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return f"<User {self.username}>"
