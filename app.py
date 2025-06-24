@@ -35,15 +35,16 @@ def home():
 
 @app.route("/login" , methods=["GET", "POST"])
 def login():
+    
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         user = User.query.filter_by(username=username).first()
-        if user and user.password == password:  # Assuming password is stored in plain text for simplicity
+        if user and user.password_hash == password:  # Assuming password is stored in plain text for simplicity
             login_user(user)
             return redirect(url_for('home'))
         flash('Invalid username or password.')
-    return render_template("loginandsinup.html")
+    return render_template("login.html")
 
 @app.route('/signup', methods=['GET','POST'])
 def signup():
@@ -54,13 +55,13 @@ def signup():
         if User.query.filter_by(username=username).first():
             flash('Username already taken.')
         else:
-            user = User(username=username, email=email, password=password)
+            user = User(username=username, email=email, password_hash=password)
             #user.set_password(password)
             db.session.add(user)
             db.session.commit()
             login_user(user)
             return redirect(url_for('home'))
-    return render_template('loginandsinup.html')
+    return render_template('signup.html')
 
 @app.route("/testdb")
 def testdb():

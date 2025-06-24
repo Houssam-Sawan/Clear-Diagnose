@@ -14,6 +14,19 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
+    def is_active(self):
+        """Return True if the user is active."""
+        return True
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return True
+    def is_anonymous(self):
+        """Return False, as this user class does not support anonymous users."""
+        return False
+    def get_id(self):
+        """Return the user ID as a string."""
+        return str(self.id)
+
     def set_password(self, password):
         """Set the password hash for the user."""
         self.password_hash = generate_password_hash(password)
