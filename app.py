@@ -43,7 +43,7 @@ def login():
             login_user(user)
             return redirect(url_for('home'))
         flash('Invalid username or password.')
-    return render_template("loginandsinup.html")
+    return render_template("login.html")
 
 @app.route('/signup', methods=['GET','POST'])
 def signup():
@@ -60,7 +60,7 @@ def signup():
             db.session.commit()
             login_user(user)
             return redirect(url_for('home'))
-    return render_template('loginandsinup.html')
+    return render_template('signup.html')
 
 @app.route("/testdb")
 def testdb():

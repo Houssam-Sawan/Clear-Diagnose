@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- coding by @_.codedevotee -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <title>Login Register form</title>
+
+        <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/templatemo-space-dynamic.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animated.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.css') }}">
+
+    <!--Boxicons CDN-->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' 
+    rel='stylesheet'>
+
+    <!--Custom CSS-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
+</head>
+
+<body>
+    <!-- FOR SOURCE CODE COMMENT "CODE" -->
+     {% include "navbar.html" %}
+    <div class="wrapper active">
+        <span class="rotate-bg"></span>
+        <span class="rotate-bg2"></span>
+
+        <div class="form-box register">
+
+            <h2 class="title animation" style="--i:17; --j:0">Sign Up</h2>
+
+            <form action="{{ url_for('signup') }}" method="post">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, msg in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ msg }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <div class="input-box animation" style="--i:18; --j:1">
+                    <input name="new_username" type="text" required>
+                    <label for="new_username">Username</label>
+                    <i class='bx bxs-user'></i>
+                </div>
+
+                <div class="input-box animation" style="--i:19; --j:2">
+                    <input name="new_email" type="email" required>
+                    <label for="new_email">Email</label>
+                    <i class='bx bxs-envelope'></i>
+                </div>
+
+                <div class="input-box animation" style="--i:20; --j:3">
+                    <input name="new_password" type="password" required>
+                    <label for="new_password">Password</label>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+
+                <button type="submit" class="btn animation" style="--i:21;--j:4">Sign Up</button>
+
+                <div class="linkTxt animation" style="--i:22; --j:5">
+                    <p>Already have an account? <a href="{{ url_for('login') }}" class="login-link">Login</a></p>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="info-text register">
+            <h2 class="animation" style="--i:17; --j:0;">Join Us Today!</h2>
+            <p class="animation" style="--i:18; --j:1;">Create your account now and enjoy an exceptional experience!
+
+            </p>
+        </div>
+
+    </div>
+
+      <!-- Scripts -->
+        <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+        <script src="{{ url_for('static', filename='js/owl-carousel.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/animation.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/imagesloaded.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/templatemo-custom.js') }}"></script>
+
+    <!--Script.js-->
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+
+</html> 
