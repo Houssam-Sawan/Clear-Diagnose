@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-4">{{ conversation.subject }}</h5>
+
+      <!-- Chat messages -->
+      <div class="chat-box" style="max-height: 500px; overflow-y: auto;">
+        {% for msg in conversation.messages %}
+          <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
+            <div class="p-3 rounded {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light border{% endif %}" style="max-width: 75%;">
+              <div class="small fw-bold mb-1">
+                {% if msg.sender_id == current_user.id %}You{% else %}{{ msg.sender.username }}{% endif %}
+              </div>
+              <div>{{ msg.content }}</div>
+              <div class="text-muted small mt-1 text-end">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-muted text-center">No messages yet.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Message input -->
+      <form method="POST" class="mt-4">
+        <div class="input-group">
+          <textarea name="message" class="form-control" rows="2" placeholder="Type your message..." required></textarea>
+          <button class="btn btn-success" type="submit">Send</button>
+        </div>
+      </form>
+
+      <a href="{{ url_for('dashboard') }}" class="btn btn-link mt-3">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{%block scripts %}
+<script>
+  const chatBox = document.querySelector('.chat-box');
+  if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+{% endblock %}

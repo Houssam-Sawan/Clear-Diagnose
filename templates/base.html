@@ -12,6 +12,9 @@
   <!-- Shared CSS -->
   <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+  <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap-icons.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
 
     <!-- Additional CSS Files -->
@@ -19,6 +22,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/templatemo-space-dynamic.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animated.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 
   {% block styles %}{% endblock %}
 </head>
@@ -26,7 +30,7 @@
 
   {% include "navbar.html" %}
 
-  <div class="content">
+  <div class="content" >
     {% block content %}{% endblock %}
   </div>
 

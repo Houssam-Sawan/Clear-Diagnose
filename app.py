@@ -60,16 +60,63 @@ def signup():
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            return redirect(url_for('home'))
+            return redirect(url_for('dashboard'), user=current_user)
     return render_template('signup.html')
 
-@app.route("/testdb")
-def testdb():
-    try:
-        db.create_all()  # Ensure the database and tables are created
-        return jsonify({"message": "Database connection successful!"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+@app.route("/dashboard")
+def dashboard():
+    conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
+    return render_template('dashboard.html', conversations=conversations)
+
+@app.route('/conversation/new', methods=['GET', 'POST'])
+@login_required
+def new_conversation():
+    if request.method == 'POST':
+        subject = request.form.get('subject')
+        message = request.form.get('message')
+        if not subject or not message:
+            flash('Subject and message are required.', 'danger')
+            return redirect(url_for('new_conversation'))
+
+        convo = Conversation(
+            user_id=current_user.id,
+            subject=subject,
+            message=message,
+            status='Unread'
+        )
+        db.session.add(convo)
+        db.session.commit()
+        flash('Conversation created successfully.', 'success')
+        return redirect(url_for('dashboard'))
+
+    return render_template('new_conversation.html')
+
+@app.route('/conversation/<int:conversation_id>', methods=['GET', 'POST'])
+@login_required
+def conversation(conversation_id):
+    convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
+
+    if request.method == 'POST':
+        content = request.form.get('message')
+        if content:
+            msg = Message(
+                conversation_id=convo.id,
+                sender_id=current_user.id,
+                content=content
+            )
+            db.session.add(msg)
+            db.session.commit()
+            flash("Message sent.", "success")
+        return redirect(url_for('conversation', conversation_id=conversation_id))
+
+    return render_template('conversation.html', conversation=convo)
+
 
 if __name__ == "__main__":
     # Ensure the instance folder exists
