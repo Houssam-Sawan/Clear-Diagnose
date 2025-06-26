@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
-
+from openai import OpenAI
 from livereload import Server
 from config import Config
 from models import *  # Import All models here
@@ -10,6 +10,14 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 db.init_app(app)
+
+client = OpenAI(
+  base_url="https://openrouter.ai/api/v1",
+  api_key="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",
+)
+
+
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -103,19 +111,57 @@ def conversation(conversation_id):
     convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
 
     if request.method == 'POST':
-        content = request.form.get('message')
-        if content:
+        user_input  = request.form.get('message')
+        if user_input:
             msg = Message(
                 conversation_id=convo.id,
                 sender_id=current_user.id,
-                content=content
+                content=user_input
             )
             db.session.add(msg)
             db.session.commit()
             flash("Message sent.", "success")
+            # Call the medical bot API
+            bot_response = ask_medical_bot(user_input)
+            bot_msg = Message(
+                conversation_id=convo.id,
+                sender_id=0,  # Assuming 0 is the bot's ID
+                content=bot_response
+            )
+            db.session.add(bot_msg)
+            db.session.commit()
         return redirect(url_for('conversation', conversation_id=conversation_id))
 
     return render_template('conversation.html', conversation=convo)
+
+MODEL = "tngtech/deepseek-r1t-chimera:free"
+
+def ask_medical_bot(user_input):
+    system_prompt = (
+        "You are a cautious and helpful medical assistant. "
+        "Based on the user's symptoms, suggest possible causes and remind them to consult a doctor. "
+        "Make your answers as short as possible. "
+        "Ask for more information if needed, untillyou narrow down the possibilities. "
+        "you can ask personal questions like age and gender to narrow down the possibilities. "
+        "If the user asks about a specific disease, provide a brief description. "
+        "If the user asks about a specific symptom, provide a brief description. "
+        "Only return the final reply, not internal thoughts or reasoning."
+
+    )
+
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_input}
+        ]
+    )
+
+    try:
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"[GPT Error] {e}")
+        return "Sorry, something went wrong while generating a response. Please try again."
 
 
 if __name__ == "__main__":
