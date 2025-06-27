@@ -17,7 +17,7 @@ migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+  api_key="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",
 )
 
 
@@ -124,9 +124,9 @@ def conversation(conversation_id):
             flash("Message sent.", "success")
 
             # Call the Online medical bot API
-            #bot_response = ask_medical_bot(user_input)
+            bot_response = ask_medical_bot(user_input)
             #bot_response = ask_local_bot(user_input)
-            bot_response = "test response"  # Placeholder for actual bot response
+            #bot_response = "test response"  # Placeholder for actual bot response
 
             bot_msg = Message(
                 conversation_id=convo.id,
@@ -158,9 +158,9 @@ def chat(conversation_id):
             flash("Message sent.", "success")
 
             # Call the Online medical bot API
-            #bot_response = ask_medical_bot(user_input)
+            bot_response = ask_medical_bot(user_input)
             #bot_response = ask_local_bot(user_input)
-            bot_response = "test response"  # Placeholder for actual bot response
+            #bot_response = "test response"  # Placeholder for actual bot response
 
             bot_msg = Message(
                 conversation_id=convo.id,
@@ -172,9 +172,8 @@ def chat(conversation_id):
         return redirect(url_for('chat', conversation_id=conversation_id))
 
     return render_template('chat.html', conversation=convo, conversations=conversations)
-
 """
-gpt_model = GPT4All("gpt4all-lora-quantized.bin", model_path=".", allow_download=False)
+gpt_model = GPT4All("Mistral-7B-Instruct-v0.3.IQ1_M.gguf", model_path=".", allow_download=False)
 
 def ask_local_bot(prompt):
     system_prompt = (
@@ -196,7 +195,7 @@ def ask_local_bot(prompt):
     )
     return response['choices'][0]['message']['content']
 """
-MODEL = "tngtech/deepseek-r1t-chimera:free"
+MODEL = "mistralai/mistral-small-3.2-24b-instruct:free"
 
 def ask_medical_bot(user_input):
     system_prompt = (
