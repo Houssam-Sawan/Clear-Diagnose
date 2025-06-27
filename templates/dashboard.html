@@ -47,6 +47,10 @@
                         <a href="{{ url_for('conversation', conversation_id=convo.id) }}">
                         View Conversation
                         </a>
+                    </div>                    <div class="mt-3">
+                        <a href="{{ url_for('chat', conversation_id=convo.id) }}">
+                        View chat
+                        </a>
                     </div>
                 </li>
             {% endfor %}

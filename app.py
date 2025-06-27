@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
+from flask_migrate import Migrate
 from openai import OpenAI
 from gpt4all import GPT4All
 from livereload import Server
@@ -11,6 +12,8 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 db.init_app(app)
+
+migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
@@ -94,8 +97,7 @@ def new_conversation():
         convo = Conversation(
             user_id=current_user.id,
             subject=subject,
-            message=message,
-            status='Unread'
+            role= current_user.role
         )
         db.session.add(convo)
         db.session.commit()
@@ -123,7 +125,9 @@ def conversation(conversation_id):
 
             # Call the Online medical bot API
             #bot_response = ask_medical_bot(user_input)
-            bot_response = ask_local_bot(user_input)
+            #bot_response = ask_local_bot(user_input)
+            bot_response = "test response"  # Placeholder for actual bot response
+
             bot_msg = Message(
                 conversation_id=convo.id,
                 sender_id=0,  # Assuming 0 is the bot's ID
@@ -135,7 +139,42 @@ def conversation(conversation_id):
 
     return render_template('conversation.html', conversation=convo)
 
-gpt_model = GPT4All("gpt4all-lora-quantized.bin")
+@app.route('/chat/<int:conversation_id>', methods=['GET', 'POST'])
+@login_required
+def chat(conversation_id):
+    convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
+    conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
+
+    if request.method == 'POST':
+        user_input  = request.form.get('message')
+        if user_input:
+            msg = Message(
+                conversation_id=convo.id,
+                sender_id=current_user.id,
+                content=user_input
+            )
+            db.session.add(msg)
+            db.session.commit()
+            flash("Message sent.", "success")
+
+            # Call the Online medical bot API
+            #bot_response = ask_medical_bot(user_input)
+            #bot_response = ask_local_bot(user_input)
+            bot_response = "test response"  # Placeholder for actual bot response
+
+            bot_msg = Message(
+                conversation_id=convo.id,
+                sender_id=0,  # Assuming 0 is the bot's ID
+                content=bot_response
+            )
+            db.session.add(bot_msg)
+            db.session.commit()
+        return redirect(url_for('chat', conversation_id=conversation_id))
+
+    return render_template('chat.html', conversation=convo, conversations=conversations)
+
+"""
+gpt_model = GPT4All("gpt4all-lora-quantized.bin", model_path=".", allow_download=False)
 
 def ask_local_bot(prompt):
     system_prompt = (
@@ -156,7 +195,7 @@ def ask_local_bot(prompt):
         max_tokens=200
     )
     return response['choices'][0]['message']['content']
-
+"""
 MODEL = "tngtech/deepseek-r1t-chimera:free"
 
 def ask_medical_bot(user_input):
