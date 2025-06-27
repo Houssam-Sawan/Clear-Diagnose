@@ -4,3 +4,4 @@ flask_login
 werkzeug
 livereload
 openai
+gpt4all
