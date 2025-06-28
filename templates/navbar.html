@@ -11,13 +11,25 @@
             <!-- ***** Logo End ***** -->
             <!-- ***** Menu Start ***** -->
             <ul class="nav">
-              <li class="scroll-to-section"><a href="#top" class="active">Home</a></li>
+              <li class="scroll-to-section"><a href="{{ url_for('home') }}" class="active">Home</a></li>
               <li class="scroll-to-section"><a href="#about">About Us</a></li>
               <li class="scroll-to-section"><a href="#services">Services</a></li>
               <li class="scroll-to-section"><a href="#FAQ">FAQ</a></li>
               <li class="scroll-to-section"><a href="#blog">Blog</a></li> 
               <li class="scroll-to-section"><a href="#contact">Message Us</a></li> 
-              <li class="scroll-to-section"><div class="main-red-button"><a href="{{ url_for('login') }}">log in</a></div></li>
+               {% if current_user.is_authenticated %}
+              <li class="scroll-to-section"><a href="{{url_for('dashboard')}}">Dashboard</a></li> 
+                {% endif %}
+
+              <li class="scroll-to-section">
+                <div class="main-red-button">
+                  {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('logout') }}">log out</a>
+                  {% else %}
+                    <a href="{{ url_for('login') }}">log in</a>
+                  {% endif %}
+                </div>
+              </li>
  
             </ul>        
             <a class='menu-trigger'>

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Medical Assistant Chat{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Medical Assistant Chat</h5>    
+    </div>
+    <div class="card-body">
+      <h5 class="card-title mb-4">{{ conversation.subject }}</h5>
+
+      <!-- Chat messages -->
+        <div class="card-body" style="height: 500px; overflow-y: auto;" id="chat-box">
+        {% for msg in conversation.messages %}
+            <div class="mb-3 d-flex {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
+            <div class="p-3 rounded {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light border{% endif %}" style="max-width: 75%;">
+                <div class="small fw-bold mb-1">
+                {% if msg.sender_id == current_user.id %}
+                    You
+                {% elif msg.sender.username %}
+                    {{ msg.sender.username }}
+                {% else %}
+                    Medical Bot
+                {% endif %}
+                </div>
+                <div>{{ msg.content }}</div>
+                <div class="text-muted small mt-1 text-end">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+            </div>
+            </div>
+        {% else %}
+            <p class="text-muted text-center">No messages yet. Ask a medical question!</p>
+        {% endfor %}
+        </div>
+
+      <!-- Message input -->
+        <div class="card-footer">
+            <form method="POST">
+                <div class="input-group">
+                <textarea name="message" class="form-control" placeholder="Type your symptoms or questions..." rows="2" required></textarea>
+                <button class="btn btn-success" type="submit">Send</button>
+                </div>
+            </form>
+        </div>
+
+      <a href="{{ url_for('dashboard') }}" class="btn btn-link mt-3">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{%block scripts %}
+<script>
+  const chatBox = document.querySelector('.chat-box');
+  if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+{% endblock %}

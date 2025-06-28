@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Start New Conversation</h5>
+      <form method="POST">
+        <div class="mb-3">
+          <label for="subject" class="form-label">Subject</label>
+          <input type="text" name="subject" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="message" class="form-label">Message</label>
+          <textarea name="message" rows="5" class="form-control" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Send</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

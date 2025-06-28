@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row">
+    <!-- User Info Card -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">User Profile</h5>
+          <p><strong>Username:</strong> {{ current_user.username }}</p>
+          <p><strong>Email:</strong> {{ current_user.email }}</p>
+          <p><strong>Member Since:</strong> {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversation History -->
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Conversation History</h5>
+           <a href="{{ url_for('new_conversation') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> New Conversation
+                </a>
+          {% if conversations %}
+            <ul class="list-group list-group-flush">
+            {% for convo in conversations %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>{{ convo.subject }}</strong><br>
+                        <small class="text-muted">{{ convo.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary">{{ convo.status }}</span>
+                    </div>
+                    </div>
+                    <p class="mb-1 mt-2">{{ convo.subject[:120] }}{% if convo.subject|length > 120 %}...{% endif %}</p>
+                    <div class="mt-3">
+                        <a href="{{ url_for('conversation', conversation_id=convo.id) }}">
+                        View Conversation
+                        </a>
+                    </div>                    <div class="mt-3">
+                        <a href="{{ url_for('chat', conversation_id=convo.id) }}">
+                        View chat
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+                <div class="mt-3">
+                </div>
+            </ul>
+
+          {% else %}
+            <p class="text-muted">No conversation history yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
