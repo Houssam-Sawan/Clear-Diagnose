@@ -2,7 +2,7 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, f
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_migrate import Migrate
 from openai import OpenAI
-from gpt4all import GPT4All
+#from gpt4all import GPT4All
 from livereload import Server
 from config import Config
 from models import *  # Import All models here
@@ -17,7 +17,7 @@ migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+  api_key="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",
 )
 
 
