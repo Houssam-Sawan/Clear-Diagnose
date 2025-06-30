@@ -17,7 +17,7 @@ migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+  api_key="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",
 )
 
 
