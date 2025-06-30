@@ -82,7 +82,7 @@ class Conversation(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     role = db.Column(db.String(50), default='User')  # 'User' or 'Doctor'
     subject = db.Column(db.String(255), nullable=False)
-    messages = db.relationship('Message', backref='conversation', lazy=True, order_by="Message.timestamp")
+    messages = db.relationship('Message', backref='conversation',cascade="all, delete-orphan", lazy=True, order_by="Message.timestamp")
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 

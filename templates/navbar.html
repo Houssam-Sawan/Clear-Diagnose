@@ -18,7 +18,7 @@
               <li class="scroll-to-section"><a href="#blog">Blog</a></li> 
               <li class="scroll-to-section"><a href="#contact">Message Us</a></li> 
                {% if current_user.is_authenticated %}
-              <li class="scroll-to-section"><a href="{{url_for('dashboard')}}">Dashboard</a></li> 
+              <li class="scroll-to-section"><a href="{{url_for('chat', conversation_id=0)}}">Dashboard</a></li> 
                 {% endif %}
 
               <li class="scroll-to-section">
