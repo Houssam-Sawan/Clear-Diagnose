@@ -17,7 +17,7 @@ migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+  api_key="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",
 )
 
 
@@ -84,94 +84,88 @@ def dashboard():
     conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
     return render_template('dashboard.html', conversations=conversations)
 
-@app.route('/conversation/new', methods=['GET', 'POST'])
+@app.route('/new_chat', methods=['GET', 'POST'])
 @login_required
-def new_conversation():
+def new_chat():
     if request.method == 'POST':
-        subject = request.form.get('subject')
-        message = request.form.get('message')
-        if not subject or not message:
-            flash('Subject and message are required.', 'danger')
-            return redirect(url_for('new_conversation'))
+        # Create a new conversation for the current userm
+        new_message = request.form.get('message')
 
-        convo = Conversation(
-            user_id=current_user.id,
-            subject=subject,
-            role= current_user.role
-        )
-        db.session.add(convo)
+        
+        # Create a new conversation with the current user
+        new_subject = new_message[:50]  # Use the first 50 characters of the message as the subject
+        new_conv = Conversation(user_id=current_user.id, subject=new_subject, role='User', timestamp=datetime.now())
+        db.session.add(new_conv)
         db.session.commit()
-        flash('Conversation created successfully.', 'success')
-        return redirect(url_for('dashboard'))
+        msg = Message( conversation_id=new_conv.id, sender_id=current_user.id, role='User', content=new_message, timestamp=datetime.now())
+        db.session.add(msg)
+        db.session.commit()
 
-    return render_template('new_conversation.html')
+    # Redirect to the new conversation page
+    return redirect(url_for('chat', conversation_id=new_conv.id))
 
-@app.route('/conversation/<int:conversation_id>', methods=['GET', 'POST'])
-@login_required
-def conversation(conversation_id):
-    convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
-
-    if request.method == 'POST':
-        user_input  = request.form.get('message')
-        if user_input:
-            msg = Message(
-                conversation_id=convo.id,
-                sender_id=current_user.id,
-                content=user_input
-            )
-            db.session.add(msg)
-            db.session.commit()
-            flash("Message sent.", "success")
-
-            # Call the Online medical bot API
-            bot_response = ask_medical_bot(user_input)
-            #bot_response = ask_local_bot(user_input)
-            #bot_response = "test response"  # Placeholder for actual bot response
-
-            bot_msg = Message(
-                conversation_id=convo.id,
-                sender_id=0,  # Assuming 0 is the bot's ID
-                content=bot_response
-            )
-            db.session.add(bot_msg)
-            db.session.commit()
-        return redirect(url_for('conversation', conversation_id=conversation_id))
-
-    return render_template('conversation.html', conversation=convo)
 
 @app.route('/chat/<int:conversation_id>', methods=['GET', 'POST'])
 @login_required
 def chat(conversation_id):
-    convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
+    
     conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
+    
+    # If conversation_id is 0, redirect to the Show new chat dialog
+    if conversation_id == 0:
+        # Fetch the conversation and its messages
 
-    if request.method == 'POST':
+        return render_template('chat.html', conversations=conversations, new_chat=True)
+    
+    convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
+
+    if request.method == 'POST' :
         user_input  = request.form.get('message')
         if user_input:
             msg = Message(
                 conversation_id=convo.id,
                 sender_id=current_user.id,
-                content=user_input
+                content=user_input,
+                role='User',
+                timestamp=datetime.now()
             )
             db.session.add(msg)
             db.session.commit()
             flash("Message sent.", "success")
 
             # Call the Online medical bot API
-            bot_response = ask_medical_bot(user_input)
+            #bot_response = ask_medical_bot(user_input)
             #bot_response = ask_local_bot(user_input)
-            #bot_response = "test response"  # Placeholder for actual bot response
+            bot_response = "test response"  # Placeholder for actual bot response
 
             bot_msg = Message(
                 conversation_id=convo.id,
                 sender_id=0,  # Assuming 0 is the bot's ID
-                content=bot_response
+                content=bot_response,
+                role='Bot',
+                timestamp=datetime.now()
             )
             db.session.add(bot_msg)
             db.session.commit()
-        return redirect(url_for('chat', conversation_id=conversation_id))
+        return redirect(url_for('chat', conversation_id=conversation_id, new_chat=False))
+    
+    return render_template('chat.html', conversations=conversations, conversation=convo, new_chat=False)
+    
+@app.route('/chatt/<int:conversation_id>/delete', methods=['POST'])
+@login_required
+def delete_conversation(conversation_id):
+    conversation = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
 
-    return render_template('chat.html', conversation=convo, conversations=conversations)
+    # Delete all messages in the conversation
+    Message.query.filter_by(conversation_id=conversation.id).delete()
+
+    # Then delete the conversation itself
+    db.session.delete(conversation)
+    db.session.commit()
+
+    flash("Conversation deleted successfully.", "success")
+    return redirect(url_for('chat', conversation_id=0)) 
+
 """
 gpt_model = GPT4All("Mistral-7B-Instruct-v0.3.IQ1_M.gguf", model_path=".", allow_download=False)
 

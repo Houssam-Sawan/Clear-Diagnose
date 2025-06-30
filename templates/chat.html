@@ -8,12 +8,17 @@
 
     <div class="row">
 
-      <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
+      <div class="col-md-5 col-lg-4 col-xl-3 mb-4 mb-md-0 overflow-auto" style='height: 65vh;' id="chat-history">
 
-        <h5 class="font-weight-bold mb-3 text-center text-lg-start">Member</h5>
+        <h5 class="font-weight-bold mb-3 text-center text-lg-start">Chat History</h5>
 
-        <div class="card">
+        <div class="card shadow-sm">
           <div class="card-body">
+          {% if new_chat %}
+            <a href="{{url_for('chat', conversation_id=0)}}" class="btn btn-primary mb-3">
+              <i class="bi bi-plus-circle me-1"></i> Start New Chat with Medical Bot
+            </a>
+          {% endif %}
           {% if conversations %}
             <ul class="list-unstyled mb-0">
             {% for conversation in conversations %}
@@ -31,9 +36,16 @@
                   </div>
                   <div class="pt-1">
                     <p class="small text-muted mb-1">{{ conversation.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <form method="POST"
+                          action="{{ url_for('delete_conversation', conversation_id=conversation.id) }}"
+                          class="delete-form">
+                      <button type="button" class="btn btn-link text-danger trigger-delete">
+                        <i class="bi bi-trash3-fill"></i>
+                      </button>
+                    </form>
                   </div>
                 </a>
-               <p>
+                      <p>
                         <a href="{{ url_for('chat', conversation_id=conversation.id) }}">
                         View chat
                         </a>
@@ -49,73 +61,86 @@
         </div>
 
       </div>
-
+      <div class="col-md-1 col-lg-1 col-xl-1 overflow-auto"  style='height: 65vh;' id="chat-box"></div>
       <div class="col-md-6 col-lg-7 col-xl-8 overflow-auto"  style='height: 65vh;' id="chat-box">
         <ul class="list-unstyled">
-          {% for msg in conversation.messages %}
-            {% if msg.sender_id == current_user.id %}
-              <li class="d-flex flex-row-reverse mb-4">
-                <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
-                    class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" style="width:60px">
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between p-3">
-                    <p class="fw-bold mb-0">You</p>
-                    <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+          {% if conversation %}
+            {% for msg in conversation.messages %}
+              {% if msg.sender_id == current_user.id %}
+                <li class="d-flex flex-row-reverse mb-4">
+                  <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                      class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" style="width:60px">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between p-3">
+                      <p class="fw-bold mb-0">You</p>
+                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    <div class="card-body">
+                      <p class="mb-0">
+                        {{ msg.content }}
+                      </p>
+                    </div>
                   </div>
-                  <div class="card-body">
-                    <p class="mb-0">
-                      {{ msg.content }}
-                    </p>
-                  </div>
+                    
+                </li>
+              {% elif msg.sender.username %}
+                <li class="d-flex mb-4">
+                  <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                    class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="width:60px">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between p-3">
+                      <p class="fw-bold mb-0">
+                            {{ msg.sender.username }}
+                      </p>
+                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    <div class="card-body">
+                      <p class="mb-0">
+                        {{ msg.content }}
+                      </p>
+                    </div>
                 </div>
-                  
+                </li>
+              {% else %}
+                <li class="d-flex mb-4">
+                  <img src="{{ url_for('static', filename='images/mbotavatar.webp') }}" alt="avatar"
+                    class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="max-width:60px">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between p-3">
+                      <p class="fw-bold mb-0">
+                            Medical Bot
+                      </p>
+                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    <div class="card-body">
+                      <p class="mb-0">
+                        {{ msg.content }}
+                      </p>
+                    </div>
+                </div>
+                </li>              
+              {% endif %}
+            {% endfor %}
+            <form id="chat-form" method="POST">
+              <li class="bg-white mb-3">
+                <div data-mdb-input-init class="form-outline">
+                  <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
+                </div>
               </li>
-            {% elif msg.sender.username %}
-              <li class="d-flex mb-4">
-                <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
-                  class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="width:60px">
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between p-3">
-                    <p class="fw-bold mb-0">
-                          {{ msg.sender.username }}
-                    </p>
-                    <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-                  </div>
-                  <div class="card-body">
-                    <p class="mb-0">
-                      {{ msg.content }}
-                    </p>
-                  </div>
-              </div>
-              </li>
-            {% else %}
-              <li class="d-flex mb-4">
-                <img src="{{ url_for('static', filename='images/mbotavatar.webp') }}" alt="avatar"
-                  class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="max-width:60px">
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between p-3">
-                    <p class="fw-bold mb-0">
-                          Medical Bot
-                    </p>
-                    <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-                  </div>
-                  <div class="card-body">
-                    <p class="mb-0">
-                      {{ msg.content }}
-                    </p>
-                  </div>
-              </div>
-              </li>              
-            {% endif %}
-          {% endfor %}
-          <form id="chat-form" method="POST">
-            <li class="bg-white mb-3">
-              <div data-mdb-input-init class="form-outline">
-                <textarea autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
-              </div>
-            </li>
-            <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
+              <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
           </form>
+          {% else %}
+            <p class="text-muted text-center">No messages yet. Ask a medical question!</p>
+            <form id="new-chat-form" action="{{ url_for('new_chat') }}" method="POST">
+              <li class="bg-white mb-3">
+                <div data-mdb-input-init class="form-outline">
+                  <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
+                </div>
+              </li>
+              <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
+            </form>
+          {% endif %}
+          
         </ul>
 
       </div>
@@ -124,6 +149,26 @@
 
   </div>
 </section>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteConfirmLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this entire conversation? This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -148,7 +193,24 @@
     });
   });
 
-  // Optional: Scroll again after short delay (in case DOM isn't done rendering)
+  // Scroll again after short delay (in case DOM isn't done rendering)
   setTimeout(() => scrollToBottom(true), 200);
 </script>
+<script>
+  let $formToSubmit = null;
+
+  $(document).ready(function () {
+    $('.trigger-delete').on('click', function () {
+      $formToSubmit = $(this).closest('form');
+      $('#deleteConfirmModal').modal('show');
+    });
+
+    $('#confirmDeleteBtn').on('click', function () {
+      if ($formToSubmit) {
+        $formToSubmit.submit();
+      }
+    });
+  });
+</script>
+
 {% endblock %}
