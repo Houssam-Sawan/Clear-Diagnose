@@ -70,7 +70,7 @@ def signup():
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            return redirect(url_for('dashboard'), user=current_user)
+            return redirect(url_for('chat', Conversation_id=0), user=current_user)
     return render_template('signup.html')
 
 @app.route("/logout")
@@ -131,7 +131,6 @@ def chat(conversation_id):
             )
             db.session.add(msg)
             db.session.commit()
-            flash("Message sent.", "success")
 
             # Call the Online medical bot API
             #bot_response = ask_medical_bot(user_input)
