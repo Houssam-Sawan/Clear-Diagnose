@@ -14,11 +14,9 @@
 
         <div class="card shadow-sm">
           <div class="card-body">
-          {% if new_chat %}
             <a href="{{url_for('chat', conversation_id=0)}}" class="btn btn-primary mb-3">
               <i class="bi bi-plus-circle me-1"></i> Start New Chat with Medical Bot
             </a>
-          {% endif %}
           {% if conversations %}
             <ul class="list-unstyled mb-0">
             {% for conversation in conversations %}
@@ -65,62 +63,67 @@
       <div class="col-md-6 col-lg-7 col-xl-8 overflow-auto"  style='height: 65vh;' id="chat-box">
         <ul class="list-unstyled">
           {% if conversation %}
-            {% for msg in conversation.messages %}
-              {% if msg.sender_id == current_user.id %}
-                <li class="d-flex flex-row-reverse mb-4">
-                  <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
-                      class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" style="width:60px">
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between p-3">
-                      <p class="fw-bold mb-0">You</p>
-                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+            {%if conversation.messages %}
+              {% for msg in conversation.messages %}
+                {% if msg.sender_id == current_user.id %}
+                  <li class="d-flex flex-row-reverse mb-4">
+                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                        class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" style="width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">You</p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
                     </div>
-                    <div class="card-body">
-                      <p class="mb-0">
-                        {{ msg.content }}
-                      </p>
-                    </div>
+                      
+                  </li>
+                {% elif msg.sender.username %}
+                  <li class="d-flex mb-4">
+                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                      class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">
+                              {{ msg.sender.username }}
+                        </p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
                   </div>
-                    
-                </li>
-              {% elif msg.sender.username %}
-                <li class="d-flex mb-4">
-                  <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
-                    class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="width:60px">
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between p-3">
-                      <p class="fw-bold mb-0">
-                            {{ msg.sender.username }}
-                      </p>
-                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-                    </div>
-                    <div class="card-body">
-                      <p class="mb-0">
-                        {{ msg.content }}
-                      </p>
-                    </div>
-                </div>
-                </li>
-              {% else %}
-                <li class="d-flex mb-4">
-                  <img src="{{ url_for('static', filename='images/mbotavatar.webp') }}" alt="avatar"
-                    class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="max-width:60px">
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between p-3">
-                      <p class="fw-bold mb-0">
-                            Medical Bot
-                      </p>
-                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-                    </div>
-                    <div class="card-body">
-                      <p class="mb-0">
-                        {{ msg.content }}
-                      </p>
-                    </div>
-                </div>
-                </li>              
-              {% endif %}
-            {% endfor %}
+                  </li>
+                {% else %}
+                  <li class="d-flex mb-4">
+                    <img src="{{ url_for('static', filename='images/mbotavatar.webp') }}" alt="avatar"
+                      class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="max-width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">
+                              Medical Bot
+                        </p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
+                  </div>
+                  </li>              
+                {% endif %}
+              {% endfor %}
+            {% else %}
+
+              <p class="text-muted text-center mt-4">No messages yet. Start the conversation!</p>
+            {% endif %}
             <form id="chat-form" method="POST">
               <li class="bg-white mb-3">
                 <div data-mdb-input-init class="form-outline">
@@ -130,7 +133,7 @@
               <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
           </form>
           {% else %}
-            <p class="text-muted text-center">No messages yet. Ask a medical question!</p>
+            <p class="text-muted text-center mt-4">No messages yet. Ask a medical question!</p>
             <form id="new-chat-form" action="{{ url_for('new_chat') }}" method="POST">
               <li class="bg-white mb-3">
                 <div data-mdb-input-init class="form-outline">
@@ -165,6 +168,49 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar Toggle Button -->
+<button id="toggleSidebar" class="btn btn-outline-secondary position-fixed bottom-0 start-0 m-3 z-index-1030">
+  <i class="bi bi-people-fill"></i> Doctors
+</button>
+<!-- Sidebar for Available Doctors -->
+<div id="doctorSidebar" class="position-fixed bottom-0 start-0 bg-light border-end shadow p-3" style="width: 300px; height: 60vh; display: none; z-index: 1020; overflow-y: auto;">
+  
+  <div class="card shadow">
+    <div class="card-header text-white" style="min-height:50px;">
+      <!-- Close Button -->
+    <button id="closeSidebar" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    </div>
+  </div>
+
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <strong>Available Doctors</strong>
+    </div>
+    <div class="card-body p-2 overflow-auto" style="max-height: 80vh;">
+    
+      {% for doctor_user in doctors %}
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h6 class="mb-0">Dr. {{ doctor_user.doctor_profile.name }}</h6>
+            <small class="text-muted d-block">{{ doctor_user.doctor_profile.specialty }}</small>
+            <small class="text-muted">
+              <i class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
+              {{ 'Online' if doctor_user.is_online else 'Offline' }}
+              {{ doctor_user.is_online}}
+            </small>
+          </div>
+          <form method="POST" >
+            <button class="btn btn-sm btn-outline-primary">Chat</button>
+          </form>
+        </div>
+        <hr class="my-2">
+      {% endfor %}
     </div>
   </div>
 </div>
@@ -209,6 +255,17 @@
       if ($formToSubmit) {
         $formToSubmit.submit();
       }
+    });
+  });
+
+  // Toggle sidebar for doctors
+  $(document).ready(function() {
+    $('#toggleSidebar').on('click', function() {
+      $('#doctorSidebar').toggle();
+    });
+
+    $('#closeSidebar').on('click', function() {
+      $('#doctorSidebar').hide();
     });
   });
 </script>
