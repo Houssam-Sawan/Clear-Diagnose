@@ -1,0 +1,69 @@
+
+          {% if conversation %}
+            <ul class="list-unstyled"></ul>
+            {%if conversation.messages %}
+              {% for msg in conversation.messages %}
+                {% if msg.sender_id == current_user.id %}
+                  <li class="d-flex flex-row-reverse mb-4">
+                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                        class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" style="width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">You</p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
+                    </div>
+                      
+                  </li>
+                {% elif msg.sender.username %}
+                  <li class="d-flex mb-4">
+                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                      class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">
+                            {%if msg.sender.role == 'doctor' %}
+                              Dr. {{ conversation.doctor_id | doctor_name}}
+                            {% else %}
+                              {{ msg.sender.username }} 
+                            {% endif %}
+                        </p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
+                  </div>
+                  </li>
+                {% else %}
+                  <li class="d-flex mb-4">
+                    <img src="{{ url_for('static', filename='images/mbotavatar.webp') }}" alt="avatar"
+                      class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="max-width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">
+                              Medical Bot
+                        </p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
+                  </div>
+                  </li>              
+                {% endif %}
+              {% endfor %}
+          </ul>
+          {% endif %}
+          {% endif %}
+
+        

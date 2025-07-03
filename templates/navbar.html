@@ -22,14 +22,13 @@
                 {% endif %}
 
               <li class="scroll-to-section">
-                <div class="main-red-button">
                   {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('logout') }}">log out</a>
+                    <a  href="{{ url_for('logout') }}">log out</a>
                   {% else %}
                     <a href="{{ url_for('login') }}">log in</a>
                   {% endif %}
-                </div>
               </li>
+              <li></li>
  
             </ul>        
             <a class='menu-trigger'>

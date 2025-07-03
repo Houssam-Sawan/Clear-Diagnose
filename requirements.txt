@@ -5,4 +5,3 @@ flask_migrate
 werkzeug
 livereload
 openai
-gpt4all

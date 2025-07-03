@@ -11,9 +11,14 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(50), default='user')
     is_admin = db.Column(db.Boolean, default=False)
+    is_online = db.Column(db.Boolean, default=False)
+    last_login = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    doctor_profile = db.relationship('Doctor', back_populates='user', uselist=False)
 
     def is_active(self):
         """Return True if the user is active."""
@@ -47,6 +52,9 @@ class Doctor(db.Model):
     specialty = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    user = db.relationship('User', back_populates='doctor_profile')
 
     def __repr__(self):
         return f"<Doctor {self.name}>"
@@ -83,13 +91,16 @@ class Conversation(db.Model):
     role = db.Column(db.String(50), default='User')  # 'User' or 'Doctor'
     subject = db.Column(db.String(255), nullable=False)
     messages = db.relationship('Message', backref='conversation',cascade="all, delete-orphan", lazy=True, order_by="Message.timestamp")
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)  
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), default='active')  # 'active', 'closed', 'pending'
 
 
     user = db.relationship('User', backref='conversations')
 
     def __repr__(self):
         return f"<Conversation {self.id} by User {self.user_id}>"
+
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)

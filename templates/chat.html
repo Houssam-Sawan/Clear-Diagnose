@@ -4,7 +4,7 @@
 
 {% block content %}
 <section>
-  <div class="container py-5">
+  <div class="container py-3">
 
     <div class="row">
 
@@ -14,11 +14,9 @@
 
         <div class="card shadow-sm">
           <div class="card-body">
-          {% if new_chat %}
             <a href="{{url_for('chat', conversation_id=0)}}" class="btn btn-primary mb-3">
               <i class="bi bi-plus-circle me-1"></i> Start New Chat with Medical Bot
             </a>
-          {% endif %}
           {% if conversations %}
             <ul class="list-unstyled mb-0">
             {% for conversation in conversations %}
@@ -30,7 +28,17 @@
                       class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" style="width:80px">
                     -->
                     <div class="pt-1">
-                      <p class="fw-bold mb-0">{{ conversation.subject }}</p>
+                      <p class="fw-bold mb-0">
+                        {% if conversation.doctor_id %}
+                          {% if current_user.role == 'doctor' %}
+                            {{ conversation.user.username }}
+                          {% else %}
+                            Dr. {{ conversation.doctor_id | doctor_name }}
+                          {% endif %}
+                        {% else %}
+                          Medical Bot
+                        {% endif %}
+                      </p>
                       <p class="small text-muted">{{ conversation.subject[:120] }}{% if conversation.subject|length > 120 %}...{% endif %}</p>
                     </div>
                   </div>
@@ -46,7 +54,15 @@
                   </div>
                 </a>
                       <p>
-                        <a href="{{ url_for('chat', conversation_id=conversation.id) }}">
+                        {% if current_user.role == 'doctor' %}
+                        <a href="{{ url_for('chat', conversation_id=conversation.id,doctor_id=conversation.doctor_id, user_id=conversation.user_id) }}" class="btn btn-sm btn-outline-primary mt-2">
+
+                        {% else %}
+                        <a href="{{ url_for('chat', conversation_id=conversation.id, doctor_id=conversation.doctor_id) }}" class="btn btn-sm btn-outline-primary mt-2">
+
+                        {% endif %}
+
+                          <i class="bi bi-chat-dots-fill"></i>
                         View chat
                         </a>
                       </p>
@@ -61,88 +77,101 @@
         </div>
 
       </div>
-      <div class="col-md-1 col-lg-1 col-xl-1 overflow-auto"  style='height: 65vh;' id="chat-box"></div>
-      <div class="col-md-6 col-lg-7 col-xl-8 overflow-auto"  style='height: 65vh;' id="chat-box">
+      <div class="col-md-1 col-lg-1 col-xl-1 overflow-auto"  style='height: 65vh;' id=""></div>
+      <div class="col-md-6 col-lg-7 col-xl-8 ' id="chat-box">
+        <div  id="chat-messages" style="height: 55vh; overflow-y: auto;">
         <ul class="list-unstyled">
           {% if conversation %}
-            {% for msg in conversation.messages %}
-              {% if msg.sender_id == current_user.id %}
-                <li class="d-flex flex-row-reverse mb-4">
-                  <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
-                      class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" style="width:60px">
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between p-3">
-                      <p class="fw-bold mb-0">You</p>
-                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+            {%if conversation.messages %}
+              {% for msg in conversation.messages %}
+                {% if msg.sender_id == current_user.id %}
+                  <li class="d-flex flex-row-reverse mb-4">
+                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                        class="rounded-circle d-flex align-self-start ms-3 shadow-1-strong" style="width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">You</p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
                     </div>
-                    <div class="card-body">
-                      <p class="mb-0">
-                        {{ msg.content }}
-                      </p>
-                    </div>
+                      
+                  </li>
+                {% elif msg.sender.username %}
+                  <li class="d-flex mb-4">
+                    <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
+                      class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">
+                            {%if msg.sender.role == 'doctor' %}
+                              Dr. {{ conversation.doctor_id | doctor_name}}
+                            {% else %}
+                              {{ msg.sender.username }} 
+                            {% endif %}
+                        </p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
                   </div>
-                    
-                </li>
-              {% elif msg.sender.username %}
-                <li class="d-flex mb-4">
-                  <img src="{{ url_for('static', filename='images/avatar.svg') }}" alt="avatar"
-                    class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="width:60px">
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between p-3">
-                      <p class="fw-bold mb-0">
-                            {{ msg.sender.username }}
-                      </p>
-                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-                    </div>
-                    <div class="card-body">
-                      <p class="mb-0">
-                        {{ msg.content }}
-                      </p>
-                    </div>
-                </div>
-                </li>
-              {% else %}
-                <li class="d-flex mb-4">
-                  <img src="{{ url_for('static', filename='images/mbotavatar.webp') }}" alt="avatar"
-                    class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="max-width:60px">
-                  <div class="card">
-                    <div class="card-header d-flex justify-content-between p-3">
-                      <p class="fw-bold mb-0">
-                            Medical Bot
-                      </p>
-                      <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-                    </div>
-                    <div class="card-body">
-                      <p class="mb-0">
-                        {{ msg.content }}
-                      </p>
-                    </div>
-                </div>
-                </li>              
-              {% endif %}
-            {% endfor %}
-            <form id="chat-form" method="POST">
-              <li class="bg-white mb-3">
-                <div data-mdb-input-init class="form-outline">
-                  <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
-                </div>
-              </li>
-              <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
-          </form>
-          {% else %}
-            <p class="text-muted text-center">No messages yet. Ask a medical question!</p>
-            <form id="new-chat-form" action="{{ url_for('new_chat') }}" method="POST">
-              <li class="bg-white mb-3">
-                <div data-mdb-input-init class="form-outline">
-                  <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
-                </div>
-              </li>
-              <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
-            </form>
+                  </li>
+                {% else %}
+                  <li class="d-flex mb-4">
+                    <img src="{{ url_for('static', filename='images/mbotavatar.webp') }}" alt="avatar"
+                      class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" style="max-width:60px">
+                    <div class="card">
+                      <div class="card-header d-flex justify-content-between p-3">
+                        <p class="fw-bold mb-0">
+                              Medical Bot
+                        </p>
+                        <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                      </div>
+                      <div class="card-body">
+                        <p class="mb-0">
+                          {{ msg.content }}
+                        </p>
+                      </div>
+                  </div>
+                  </li>              
+                {% endif %}
+              {% endfor %}
+  
           {% endif %}
-          
         </ul>
-
+        </div>
+        <div style="margin-top: 10px;">
+          <ul class="list-unstyled">
+              <form id="chat-form" method="POST">
+                <li class="bg-white mb-3">
+                  <div data-mdb-input-init class="form-outline">
+                    <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
+                  </div>
+                </li>
+                <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
+            </form>
+            {% else %}
+              {% if current_user.role != 'doctor' %}
+                <p class="text-muted text-center mt-4">No messages yet. Ask a medical question!</p>
+                <form id="new-chat-form" action="{{ url_for('new_chat', doctor_id=doctor_id) }}" method="POST">
+                  <li class="bg-white mb-3">
+                    <div data-mdb-input-init class="form-outline">
+                      <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
+                    </div>
+                  </li>
+                  <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          </ul>
+        </div>
       </div>
 
     </div>
@@ -169,12 +198,54 @@
   </div>
 </div>
 
+<!-- Sidebar Toggle Button -->
+<button id="toggleSidebar" class="btn btn-outline-secondary position-fixed bottom-0 start-0 m-3 z-index-1030">
+  <i class="bi bi-people-fill"></i> Doctors
+</button>
+<!-- Sidebar for Available Doctors -->
+<div id="doctorSidebar" class="position-fixed bottom-0 start-0 bg-light border-end shadow p-3" style="width: 300px; height: 60vh; display: none; z-index: 1020; overflow-y: auto;">
+  
+  <div class="card shadow">
+    <div class="card-header text-white" style="min-height:50px;">
+      <!-- Close Button -->
+    <button id="closeSidebar" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    </div>
+  </div>
+
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <strong>Available Doctors</strong>
+    </div>
+    <div class="card-body p-2 overflow-auto" style="max-height: 80vh;">
+    
+      {% for doctor_user in doctors %}
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h6 class="mb-0">Dr. {{ doctor_user.doctor_profile.name }}</h6>
+            <small class="text-muted d-block">{{ doctor_user.doctor_profile.specialty }}</small>
+            <small class="text-muted">
+              <i id="doctor-{{ doctor_user.id }}-status" 
+                class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
+            </small>
+          </div>
+          <a href="{{ url_for('chat',conversation_id=0, doctor_id=doctor_user.id) }}" >
+            <button class="btn btn-sm btn-outline-primary">Chat</button>
+          </a>
+        </div>
+        <hr class="my-2">
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   function scrollToBottom(force = false) {
-    const $chatBox = $('#chat-box');
+    const $chatBox = $('#chat-messages');
     const isNearBottom = $chatBox[0].scrollHeight - $chatBox.scrollTop() <= $chatBox.outerHeight() + 50;
     if (force || isNearBottom) {
       $chatBox.scrollTop($chatBox[0].scrollHeight);
@@ -211,6 +282,46 @@
       }
     });
   });
+
+  // Toggle sidebar for doctors
+  $(document).ready(function() {
+    $('#toggleSidebar').on('click', function() {
+      $('#doctorSidebar').toggle();
+    });
+
+    $('#closeSidebar').on('click', function() {
+      $('#doctorSidebar').hide();
+    });
+  });
+
+  setInterval(function () {
+    $.get("/online-status", function (data) {
+      // update DOM with latest doctor statuses
+      for (const doc of data.doctors) {
+        const el = $(`#doctor-${doc.id}-status`);
+        el.text(doc.is_online ? " Online" : " Offline");
+        el.toggleClass("text-success", doc.is_online);
+        el.toggleClass("text-secondary", !doc.is_online);
+      }
+    });
+  }, 5000);
+
+  $(document).ready(function () {
+    // Get path from the current URL
+      const path = window.location.pathname;  // e.g., "/chat/7/doctor/2"
+      const parts = path.split("/"); 
+      const conversationId = parseInt(parts[2]); 
+      // Use them as needed
+      console.log("Conversation ID:", conversationId);
+
+      setInterval(function () {
+          $.get(`/chatmessage/${conversationId}`, function (data) {
+              $('#chat-messages').html(data); // assuming the response is HTML
+          });
+          scrollToBottom(true);
+      }, 1000);
+    });
+
 </script>
 
 {% endblock %}
