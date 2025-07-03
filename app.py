@@ -227,6 +227,14 @@ def ask_medical_bot(user_input):
         print(f"[GPT Error] {e}")
         return "Sorry, something went wrong while generating a response. Please try again."
 
+@app.route("/online-status")
+@login_required
+def online_status():
+    doctors = User.query.filter_by(role="doctor").all()
+    return jsonify(doctors=[{
+        "id": doc.id,
+        "is_online": doc.is_online
+    } for doc in doctors])
 
 if __name__ == "__main__":
     # Ensure the instance folder exists

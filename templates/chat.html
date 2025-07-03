@@ -200,8 +200,8 @@
             <h6 class="mb-0">Dr. {{ doctor_user.doctor_profile.name }}</h6>
             <small class="text-muted d-block">{{ doctor_user.doctor_profile.specialty }}</small>
             <small class="text-muted">
-              <i class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
-              {{ 'Online' if doctor_user.is_online else 'Offline' }}
+              <i id="doctor-{{ doctor_user.id }}-status" 
+                class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
             </small>
           </div>
           <form method="POST" >
@@ -267,6 +267,18 @@
       $('#doctorSidebar').hide();
     });
   });
+
+  setInterval(function () {
+    $.get("/online-status", function (data) {
+      // update DOM with latest doctor statuses
+      for (const doc of data.doctors) {
+        const el = $(`#doctor-${doc.id}-status`);
+        el.text(doc.is_online ? " Online" : " Offline");
+        el.toggleClass("text-success", doc.is_online);
+        el.toggleClass("text-secondary", !doc.is_online);
+      }
+    });
+  }, 10000);
 </script>
 
 {% endblock %}
