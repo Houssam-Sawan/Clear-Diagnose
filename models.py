@@ -93,6 +93,7 @@ class Conversation(db.Model):
     messages = db.relationship('Message', backref='conversation',cascade="all, delete-orphan", lazy=True, order_by="Message.timestamp")
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)  
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), default='active')  # 'active', 'closed', 'pending'
 
 
     user = db.relationship('User', backref='conversations')

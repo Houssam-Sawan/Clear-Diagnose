@@ -202,7 +202,6 @@
             <small class="text-muted">
               <i class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
               {{ 'Online' if doctor_user.is_online else 'Offline' }}
-              {{ doctor_user.is_online}}
             </small>
           </div>
           <form method="POST" >
