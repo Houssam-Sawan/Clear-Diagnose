@@ -263,7 +263,16 @@ def ask_medical_bot(user_input):
         print(f"[GPT Error] {e}")
         return "Sorry, something went wrong while generating a response. Please try again."
 
-
+# Dynamic routes for AJAX requests
+@app.route('/chatmessage/<int:conversation_id>')
+@login_required
+def get_partial_messages(conversation_id):
+    messages = Message.query.filter_by(conversation_id=conversation_id).order_by(Message.timestamp).all()
+    
+    convo = Conversation.query.filter_by(id=conversation_id).first_or_404()
+    
+    
+    return render_template('message_list.html', messages=messages, conversation=convo)
 
 @app.route("/online-status")
 @login_required
