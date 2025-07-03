@@ -62,6 +62,11 @@ def mark_all_offline():
     User.query.update({User.is_online: False})
     db.session.commit()
 
+@app.template_filter('doctor_name')
+def doctor_name_filter(doctor_id):
+    doctor = Doctor.query.filter_by(user_id=doctor_id).first()
+    return doctor.name if doctor else "Unknown"
+
 
 @app.route("/")
 def home():
@@ -109,79 +114,31 @@ def dashboard():
     conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
     return render_template('dashboard.html', conversations=conversations)
 
-@app.route('/new_chat', methods=['GET', 'POST'])
+@app.route('/new_chat', defaults={'doctor_id': None}, methods=['GET', 'POST'])
+@app.route('/new_chat/<int:doctor_id>', methods=['GET', 'POST'])
 @login_required
-def new_chat():
+def new_chat(doctor_id):
     if request.method == 'POST':
         # Create a new conversation for the current userm
         new_message = request.form.get('message')
-
         
         # Create a new conversation with the current user
         new_subject = new_message[:50]  # Use the first 50 characters of the message as the subject
-        new_conv = Conversation(user_id=current_user.id, subject=new_subject, role='User', timestamp=datetime.now())
+        new_conv = Conversation(user_id=current_user.id, subject=new_subject, role='User', doctor_id=doctor_id, timestamp=datetime.now())
         db.session.add(new_conv)
         db.session.commit()
         msg = Message( conversation_id=new_conv.id, sender_id=current_user.id, role='User', content=new_message, timestamp=datetime.now())
         db.session.add(msg)
         db.session.commit()
-        # Call the Online medical bot API
-        #bot_response = ask_medical_bot(user_input)
-        #bot_response = ask_local_bot(user_input)
-        bot_response = "test response"  # Placeholder for actual bot response
 
-        bot_msg = Message(
-            conversation_id=new_conv.id,
-            sender_id=0,  # Assuming 0 is the bot's ID
-            content=bot_response,
-            role='Bot',
-            timestamp=datetime.now()
-        )
-        db.session.add(bot_msg)
-        db.session.commit()
-
-    # Redirect to the new conversation page
-    return redirect(url_for('chat', conversation_id=new_conv.id))
-
-
-@app.route('/chat/<int:conversation_id>', methods=['GET', 'POST'])
-@login_required
-def chat(conversation_id):
-    doctors = db.session.query(User).join(Doctor).filter(User.role == 'doctor').all()
-
-    print(f"Doctors: {doctors}")
-    # test sample for doctors data
-    #doctors = [{'id': 1, 'name': 'Dr. Smith', 'specialty': 'Cardiology' , 'is_online':True}]
-    conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
-    
-    # If conversation_id is 0, redirect to the Show new chat dialog
-    if conversation_id == 0:
-        # Fetch the conversation and its messages
-
-        return render_template('chat.html', conversations=conversations, doctors=doctors, new_chat=True)
-    
-    convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
-
-    if request.method == 'POST' :
-        user_input  = request.form.get('message')
-        if user_input:
-            msg = Message(
-                conversation_id=convo.id,
-                sender_id=current_user.id,
-                content=user_input,
-                role='User',
-                timestamp=datetime.now()
-            )
-            db.session.add(msg)
-            db.session.commit()
-
+        if not doctor_id:
             # Call the Online medical bot API
             #bot_response = ask_medical_bot(user_input)
             #bot_response = ask_local_bot(user_input)
             bot_response = "test response"  # Placeholder for actual bot response
 
             bot_msg = Message(
-                conversation_id=convo.id,
+                conversation_id=new_conv.id,
                 sender_id=0,  # Assuming 0 is the bot's ID
                 content=bot_response,
                 role='Bot',
@@ -189,9 +146,78 @@ def chat(conversation_id):
             )
             db.session.add(bot_msg)
             db.session.commit()
-        return redirect(url_for('chat', conversation_id=conversation_id, new_chat=False))
+
+    # Redirect to the new conversation page
+    return redirect(url_for('chat', doctor_id=doctor_id, conversation_id=new_conv.id))
+
+@app.route('/chat/<int:conversation_id>', defaults={'doctor_id': None}, methods=['GET', 'POST'])
+@app.route('/chat/<int:conversation_id>/doctor/<int:doctor_id>', methods=['GET', 'POST'])
+@login_required
+def chat(conversation_id, doctor_id):
+    doctors = db.session.query(User).join(Doctor).filter(User.role == 'doctor').all()
+
+    # test sample for doctors data
+    #doctors = [{'id': 1, 'name': 'Dr. Smith', 'specialty': 'Cardiology' , 'is_online':True}]
+    conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
+    doctor_conversations = Conversation.query.filter_by(doctor_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
+    
+    if current_user.role == 'doctor':
+        # If the user is a doctor, show their conversations with patients
+        conversations = doctor_conversations
+
+    # If conversation_id is 0, redirect to the Show new chat dialog
+    if conversation_id == 0:
+        # Fetch the conversation and its messages
+        return render_template('chat.html', conversations=conversations, doctors=doctors,doctor_id=doctor_id, new_chat=True)
+    user_id = request.args.get('user_id', type=int)
+
+    if user_id :
+        # If user_id is provided, filter conversations by user_id
+        convo = Conversation.query.filter_by(id=conversation_id, user_id=user_id, doctor_id=current_user.id).first_or_404()
+    else:
+        convo = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
+
+    if request.method == 'POST' :
+        user_input  = request.form.get('message')
+        
+        if user_input:
+            
+            msg = Message(
+                conversation_id=convo.id,
+                sender_id=current_user.id,
+                content=user_input,
+                role=current_user.role,  
+                timestamp=datetime.now()
+            )
+            db.session.add(msg)
+            db.session.commit()
+
+            if not convo.doctor_id:
+                # Call the Online medical bot API
+                #bot_response = ask_medical_bot(user_input)
+                #bot_response = ask_local_bot(user_input)
+                bot_response = "test response"  # Placeholder for actual bot response
+
+                bot_msg = Message(
+                    conversation_id=convo.id,
+                    sender_id=0,  # Assuming 0 is the bot's ID
+                    content=bot_response,
+                    role='Bot',
+                    timestamp=datetime.now()
+                )
+                db.session.add(bot_msg)
+                db.session.commit()
+                return redirect(url_for('chat', conversation_id=conversation_id, new_chat=False))
+            elif current_user.role == 'doctor':
+                # If the conversation is with a patient, redirect to the chat page
+                return redirect(url_for('chat', conversation_id=conversation_id,doctor_id=convo.doctor_id, user_id=convo.user_id))
+            else:
+                # If the conversation is with a doctor, redirect to the chat page
+                return redirect(url_for('chat', conversation_id=conversation_id,doctor_id=convo.doctor_id))
     
     return render_template('chat.html', conversations=conversations, conversation=convo, doctors=doctors, new_chat=False)
+
+
     
 @app.route('/chatt/<int:conversation_id>/delete', methods=['POST'])
 @login_required
@@ -236,6 +262,8 @@ def ask_medical_bot(user_input):
     except Exception as e:
         print(f"[GPT Error] {e}")
         return "Sorry, something went wrong while generating a response. Please try again."
+
+
 
 @app.route("/online-status")
 @login_required

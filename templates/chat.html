@@ -28,7 +28,17 @@
                       class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" style="width:80px">
                     -->
                     <div class="pt-1">
-                      <p class="fw-bold mb-0">{{ conversation.subject }}</p>
+                      <p class="fw-bold mb-0">
+                        {% if conversation.doctor_id %}
+                          {% if current_user.role == 'doctor' %}
+                            {{ conversation.user.username }}
+                          {% else %}
+                            Dr. {{ conversation.doctor_id | doctor_name }}
+                          {% endif %}
+                        {% else %}
+                          Medical Bot
+                        {% endif %}
+                      </p>
                       <p class="small text-muted">{{ conversation.subject[:120] }}{% if conversation.subject|length > 120 %}...{% endif %}</p>
                     </div>
                   </div>
@@ -44,7 +54,15 @@
                   </div>
                 </a>
                       <p>
-                        <a href="{{ url_for('chat', conversation_id=conversation.id) }}">
+                        {% if current_user.role == 'doctor' %}
+                        <a href="{{ url_for('chat', conversation_id=conversation.id,doctor_id=conversation.doctor_id, user_id=conversation.user_id) }}" class="btn btn-sm btn-outline-primary mt-2">
+
+                        {% else %}
+                        <a href="{{ url_for('chat', conversation_id=conversation.id, doctor_id=conversation.doctor_id) }}" class="btn btn-sm btn-outline-primary mt-2">
+
+                        {% endif %}
+
+                          <i class="bi bi-chat-dots-fill"></i>
                         View chat
                         </a>
                       </p>
@@ -89,7 +107,11 @@
                     <div class="card">
                       <div class="card-header d-flex justify-content-between p-3">
                         <p class="fw-bold mb-0">
-                              {{ msg.sender.username }}
+                            {%if msg.sender.role == 'doctor' %}
+                              Dr. {{ conversation.doctor_id | doctor_name}}
+                            {% else %}
+                              {{ msg.sender.username }} 
+                            {% endif %}
                         </p>
                         <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
                       </div>
@@ -133,15 +155,17 @@
               <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
           </form>
           {% else %}
-            <p class="text-muted text-center mt-4">No messages yet. Ask a medical question!</p>
-            <form id="new-chat-form" action="{{ url_for('new_chat') }}" method="POST">
-              <li class="bg-white mb-3">
-                <div data-mdb-input-init class="form-outline">
-                  <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
-                </div>
-              </li>
-              <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
-            </form>
+            {% if current_user.role != 'doctor' %}
+              <p class="text-muted text-center mt-4">No messages yet. Ask a medical question!</p>
+              <form id="new-chat-form" action="{{ url_for('new_chat', doctor_id=doctor_id) }}" method="POST">
+                <li class="bg-white mb-3">
+                  <div data-mdb-input-init class="form-outline">
+                    <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
+                  </div>
+                </li>
+                <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
+              </form>
+            {% endif %}
           {% endif %}
           
         </ul>
@@ -204,9 +228,9 @@
                 class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
             </small>
           </div>
-          <form method="POST" >
+          <a href="{{ url_for('chat',conversation_id=0, doctor_id=doctor_user.id) }}" >
             <button class="btn btn-sm btn-outline-primary">Chat</button>
-          </form>
+          </a>
         </div>
         <hr class="my-2">
       {% endfor %}
