@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import *
 from flask_migrate import Migrate
@@ -44,10 +45,18 @@ def load_user(user_id):
     return UserLogin.query.get(int(user_id))
 
 @app.before_request
-
 def create_tables():
     """Create database tables before the first request."""
     db.create_all()
+
+@app.before_request
+def update_last_seen():
+    if current_user.is_authenticated:
+        current_user.last_login = datetime.utcnow()
+        db.session.commit()
+@property
+def is_online(self):
+    return self.last_login and datetime.utcnow() - self.last_login < timedelta(minutes=30)
 
 def mark_all_offline():
     User.query.update({User.is_online: False})
@@ -60,7 +69,8 @@ def home():
 
 @app.route("/login" , methods=["GET", "POST"])
 def login():
-    
+    if current_user.is_authenticated:
+        return redirect(url_for('chat', conversation_id=0))
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
