@@ -2,7 +2,7 @@ from datetime import timedelta
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_login import *
 from flask_migrate import Migrate
-from openai import OpenAI
+from groq import Groq
 from livereload import Server
 from config import Config
 from models import *  # Import All models here
@@ -10,7 +10,7 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
+API_KEY = os.environ.get('API_KEY', 'default_api_key')  # Use a default value if API_KEY is not set
 
 db.init_app(app)
 
@@ -26,9 +26,10 @@ def when_user_logged_out(sender, user):
 
 migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
-client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+# Initialize OpenAI client with the base URL and API key
+
+client = Groq(
+  api_key=API_KEY,
 )
 
 
@@ -71,6 +72,10 @@ def doctor_name_filter(doctor_id):
 @app.route("/")
 def home():
     return render_template("index.html", user=current_user)
+
+@app.route("/test")
+def test():
+    return os.environ.get('API_KEY', "No API Key set"), 200
 
 @app.route("/login" , methods=["GET", "POST"])
 def login():
@@ -194,9 +199,9 @@ def chat(conversation_id, doctor_id):
 
             if not convo.doctor_id:
                 # Call the Online medical bot API
-                #bot_response = ask_medical_bot(user_input)
+                bot_response = ask_medical_bot(user_input)
                 #bot_response = ask_local_bot(user_input)
-                bot_response = "test response"  # Placeholder for actual bot response
+                #bot_response = "test response"  # Placeholder for actual bot response
 
                 bot_msg = Message(
                     conversation_id=convo.id,
@@ -234,7 +239,7 @@ def delete_conversation(conversation_id):
     flash("Conversation deleted successfully.", "success")
     return redirect(url_for('chat', conversation_id=0)) 
 
-MODEL = "mistralai/mistral-small-3.2-24b-instruct:free"
+MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 def ask_medical_bot(user_input):
     system_prompt = (
@@ -248,7 +253,6 @@ def ask_medical_bot(user_input):
         "Only return the final reply, not internal thoughts or reasoning."
 
     )
-
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
