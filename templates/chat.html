@@ -200,47 +200,7 @@
   </div>
 </div>
 
-<!-- Sidebar Toggle Button -->
-<button id="toggleSidebar" class="btn btn-outline-secondary position-fixed bottom-0 start-0 m-3 z-index-1030">
-  <i class="bi bi-people-fill"></i> Doctors
-</button>
-<!-- Sidebar for Available Doctors -->
-<div id="doctorSidebar" class="position-fixed bottom-0 start-0 bg-light border-end shadow p-3" style="width: 300px; height: 60vh; display: none; z-index: 1020; overflow-y: auto;">
-  
-  <div class="card shadow">
-    <div class="card-header text-white" style="min-height:50px;">
-      <!-- Close Button -->
-    <button id="closeSidebar" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2">
-      <i class="bi bi-x-lg"></i>
-    </button>
-    </div>
-  </div>
 
-  <div class="card shadow">
-    <div class="card-header bg-primary text-white">
-      <strong>Available Doctors</strong>
-    </div>
-    <div class="card-body p-2 overflow-auto" style="max-height: 80vh;">
-    
-      {% for doctor_user in doctors %}
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <div>
-            <h6 class="mb-0">Dr. {{ doctor_user.doctor_profile.name }}</h6>
-            <small class="text-muted d-block">{{ doctor_user.doctor_profile.specialty }}</small>
-            <small class="text-muted">
-              <i id="doctor-{{ doctor_user.id }}-status" 
-                class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
-            </small>
-          </div>
-          <a href="{{ url_for('chat',conversation_id=0, doctor_id=doctor_user.id) }}" >
-            <button class="btn btn-sm btn-outline-primary">Chat</button>
-          </a>
-        </div>
-        <hr class="my-2">
-      {% endfor %}
-    </div>
-  </div>
-</div>
 
 {% endblock %}
 {% block scripts %}
@@ -294,28 +254,6 @@
     });
   });
 
-  // Toggle sidebar for doctors
-  $(document).ready(function() {
-    $('#toggleSidebar').on('click', function() {
-      $('#doctorSidebar').toggle();
-    });
-
-    $('#closeSidebar').on('click', function() {
-      $('#doctorSidebar').hide();
-    });
-  });
-
-  setInterval(function () {
-    $.get("/online-status", function (data) {
-      // update DOM with latest doctor statuses
-      for (const doc of data.doctors) {
-        const el = $(`#doctor-${doc.id}-status`);
-        el.text(doc.is_online ? " Online" : " Offline");
-        el.toggleClass("text-success", doc.is_online);
-        el.toggleClass("text-secondary", !doc.is_online);
-      }
-    });
-  }, 5000);
 
   $(document).ready(function () {
     // Get path from the current URL

@@ -117,6 +117,7 @@ class Consultation(db.Model):
     __tablename__ = 'consultations'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     
     # --- Personal Information ---
@@ -146,6 +147,7 @@ class Consultation(db.Model):
     
     # --- Relationship to User ---
     user = db.relationship('User', backref=db.backref('consultations', lazy=True))
+    doctor = db.relationship('Doctor', backref=db.backref('consultations', lazy=True))
 
     def __repr__(self):
         return f'<Consultation {self.id} by User {self.user_id}>'
