@@ -143,7 +143,7 @@ def new_chat(doctor_id):
                 conversation_id=new_conv.id,
                 sender_id=0,  # Assuming 0 is the bot's ID
                 content=bot_response,
-                role='Bot',
+                role='Assistant',
                 timestamp=datetime.now()
             )
             db.session.add(bot_msg)
@@ -204,7 +204,7 @@ def chat(conversation_id, doctor_id):
                     conversation_id=convo.id,
                     sender_id=0,  # Assuming 0 is the bot's ID
                     content=bot_response,
-                    role='Bot',
+                    role='Assistant',
                     timestamp=datetime.now()
                 )
                 db.session.add(bot_msg)
@@ -233,7 +233,7 @@ def delete_conversation(conversation_id):
     db.session.delete(conversation)
     db.session.commit()
 
-    flash("Conversation deleted successfully.", "success")
+    #flash("Conversation deleted successfully.", "success")
     return redirect(url_for('chat', conversation_id=0)) 
 
 MODEL = "llama3-70b-8192"
