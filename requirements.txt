@@ -4,4 +4,4 @@ flask_login
 flask_migrate
 werkzeug
 livereload
-openai
+groq

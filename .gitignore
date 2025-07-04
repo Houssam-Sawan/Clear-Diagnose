@@ -1,1 +1,5 @@
-gpt4all-lora-quantized.bin
+__pycache__/*
+.venv/*
+*.pyc
+instance/*
+instance/app.db
