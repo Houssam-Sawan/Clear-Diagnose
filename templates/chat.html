@@ -16,7 +16,7 @@
           <div class="card-body">
             {% if current_user.role != 'doctor' %}
             <a href="{{url_for('chat', conversation_id=0)}}" class="btn btn-primary mb-3">
-              <i class="bi bi-plus-circle me-1"></i> Start New Chat with Medical Bot
+              <i class="bi bi-plus-circle me-1"></i> Start New Chat with Medical Assistant
             </a>
             {% endif %}
           {% if conversations %}
@@ -38,7 +38,7 @@
                             Dr. {{ conversation.doctor_id | doctor_name }}
                           {% endif %}
                         {% else %}
-                          Medical Bot
+                          Medical Assistant
                         {% endif %}
                       </p>
                       <p class="small text-muted">{{ conversation.subject[:120] }}{% if conversation.subject|length > 120 %}...{% endif %}</p>
@@ -132,7 +132,7 @@
                     <div class="card">
                       <div class="card-header d-flex justify-content-between p-3">
                         <p class="fw-bold mb-0">
-                              Medical Bot
+                              Medical Assistant
                         </p>
                         <p class="text-muted small mb-0 ms-3"><i class="far fa-clock"></i> {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
                       </div>
@@ -165,7 +165,7 @@
                 <form id="new-chat-form" action="{{ url_for('new_chat', doctor_id=doctor_id) }}" method="POST">
                   <li class="bg-white mb-3">
                     <div data-mdb-input-init class="form-outline">
-                      <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample2" rows="4"></textarea>
+                      <textarea required autofocus class="form-control bg-body-tertiary" placeholder="Wright your message here..." name="message" id="textAreaExample1" rows="4"></textarea>
                     </div>
                   </li>
                   <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-info btn-rounded float-end">Send</button>
@@ -257,15 +257,24 @@
   // Scroll on load
   $(document).ready(function () {
     scrollToBottom(true);
-    // Handle Enter key for sending message
+
+  // Handle Enter key for sending message
     $('#textAreaExample2').keypress(function (e) {
       if (e.which === 13 && !e.shiftKey) {
         e.preventDefault(); // prevent newline
         $('#chat-form').submit();
       }
     });
+
+    $('#textAreaExample1').keypress(function (e) {
+      if (e.which === 13 && !e.shiftKey) {
+        e.preventDefault(); // prevent newline
+        $('#new-chat-form').submit();
+      }
+    });
   });
 
+  
   // Scroll again after short delay (in case DOM isn't done rendering)
   setTimeout(() => scrollToBottom(true), 200);
 </script>
