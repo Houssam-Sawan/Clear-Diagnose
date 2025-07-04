@@ -10,7 +10,7 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
-API_KEY = os.environ.get('API_KEY', 'default_api_key')  # Use a default value if API_KEY is not set
+#GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 db.init_app(app)
 
@@ -28,10 +28,7 @@ migrate = Migrate(app, db)  # Initialize Flask-Migrate for database migrations
 
 # Initialize OpenAI client with the base URL and API key
 
-client = Groq(
-  api_key=API_KEY,
-)
-
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -75,7 +72,7 @@ def home():
 
 @app.route("/test")
 def test():
-    return os.environ.get('API_KEY', "No API Key set"), 200
+    return os.environ.get('GROQ_API_KEY')
 
 @app.route("/login" , methods=["GET", "POST"])
 def login():
@@ -239,7 +236,7 @@ def delete_conversation(conversation_id):
     flash("Conversation deleted successfully.", "success")
     return redirect(url_for('chat', conversation_id=0)) 
 
-MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
+MODEL = "llama3-70b-8192"
 
 def ask_medical_bot(user_input):
     system_prompt = (
