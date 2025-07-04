@@ -138,9 +138,9 @@ def new_chat(doctor_id):
 
         if not doctor_id:
             # Call the Online medical bot API
-            #bot_response = ask_medical_bot(user_input)
+            bot_response = ask_medical_bot(new_message)
             #bot_response = ask_local_bot(user_input)
-            bot_response = "test response"  # Placeholder for actual bot response
+            #bot_response = "test response"  # Placeholder for actual bot response
 
             bot_msg = Message(
                 conversation_id=new_conv.id,
