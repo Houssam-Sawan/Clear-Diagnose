@@ -59,7 +59,7 @@
                 class="bi bi-circle-fill {% if doctor_user.is_online %}text-success{% else %}text-secondary{% endif %}"></i>
             </small>
           </div>
-          <a href="{{ url_for('chat',conversation_id=0, doctor_id=doctor_user.id) }}" >
+          <a href="{{ url_for('consultation_form', doctor_id=doctor_user.id) }}" >
             <button class="btn btn-sm btn-outline-primary">Chat</button>
           </a>
         </div>

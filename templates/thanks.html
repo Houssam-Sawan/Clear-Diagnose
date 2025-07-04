@@ -33,11 +33,23 @@
         <div class="thank-you-container">
             <h1>Your consultation has been submitted </h1>
             <p>
-              Thank you. We have received your information and it will be reviewed by a specialist doctor as soon as possible. 
+              Thank you. We have received your information and created a new chat entry in your dashboard. 
               <br>
-              You will be notified when the response arrives.            
+              you can View your consultation details in the dashboard.         
             </p>
-            <a href="{{ url_for('home') }}">Return to Home Page</a>
+            {% if consultation %}
+                {% if consultation.doctor_id %}
+                <p>
+                    Your consultation has been assigned to Dr. {{ consultation.doctor.name }}.
+                    <a href="{{ url_for('chat',conversation_id=conevrsation_id, doctor_id=consultation.doctor_id) }}'">Continue to the Doctor Conversation </a>
+                </p>
+                {% else %}
+                <p>
+                    Ask our Medical Assistant
+                    <a href="{{ url_for('chat', conversation_id=conversation.id) }}">Continue to the Medical Assistant Conversation </a>
+                </p>
+                {% endif %}
+            {% endif %}
         </div>
     </main>
 </body>

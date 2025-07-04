@@ -111,7 +111,7 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route("/dashboard")
+@app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
     doctors = db.session.query(User).join(Doctor).filter(User.role == 'doctor').all()
@@ -126,7 +126,7 @@ def new_chat(doctor_id):
         new_message = request.form.get('message')
         
         # Create a new conversation with the current user
-        new_subject = new_message[:50]  # Use the first 50 characters of the message as the subject
+        new_subject = new_message[:40]  # Use the first 50 characters of the message as the subject
         new_conv = Conversation(user_id=current_user.id, subject=new_subject, role='User', doctor_id=doctor_id, timestamp=datetime.now())
         db.session.add(new_conv)
         db.session.commit()
@@ -237,6 +237,20 @@ def delete_conversation(conversation_id):
     #flash("Conversation deleted successfully.", "success")
     return redirect(url_for('chat', conversation_id=0)) 
 
+@app.route('/chattt/<int:conversation_id>/delete', methods=['POST'])
+@login_required
+def deletee_conversation(conversation_id):
+    conversation = Conversation.query.filter_by(id=conversation_id, user_id=current_user.id).first_or_404()
+
+    # Delete all messages in the conversation
+    Message.query.filter_by(conversation_id=conversation.id).delete()
+
+    # Then delete the conversation itself
+    db.session.delete(conversation)
+    db.session.commit()
+
+    #flash("Conversation deleted successfully.", "success")
+    return redirect(url_for('dashboard'))
 MODEL = "llama3-70b-8192"
 
 def ask_medical_bot(user_input):
@@ -327,18 +341,40 @@ def submit_consultation():
     return redirect(url_for('consultation_form'))
 
 # 3. Route for the thank you page after successful submission
-@app.route('/thank-you/consultation/<int:consultation_id>', methods=['GET'])
+@app.route('/thank-you/<int:consultation_id>', methods=['GET'])
 def thank_you(consultation_id):
     """Displays a thank you page after successful form submission."""
+    consultation = Consultation.query.get_or_404(consultation_id)
+    doctor_id = consultation.doctor_id
+    # Create a new conversation for the current userm
+    new_message = format_consultation_data(consultation_id)
+    
+    # Create a new conversation with the current user
+    new_subject = new_message[:40]  # Use the first 50 characters of the message as the subject
+    new_conv = Conversation(user_id=current_user.id, subject=new_subject, role='User', doctor_id=doctor_id, timestamp=datetime.now())
+    db.session.add(new_conv)
+    db.session.commit()
+    msg = Message( conversation_id=new_conv.id, sender_id=current_user.id, role='User', content=new_message, timestamp=datetime.now())
+    db.session.add(msg)
+    db.session.commit()
 
-    return render_template('thanks.html', consultation_id=consultation_id)
+    if not doctor_id:
+        # Call the Online medical bot API
+        bot_response = ask_medical_bot(new_message)
+        #bot_response = ask_local_bot(user_input)
+        #bot_response = "test response"  # Placeholder for actual bot response
 
+        bot_msg = Message(
+            conversation_id=new_conv.id,
+            sender_id=0,  # Assuming 0 is the bot's ID
+            content=bot_response,
+            role='Assistant',
+            timestamp=datetime.now()
+        )
+        db.session.add(bot_msg)
+        db.session.commit()
+    return render_template('thanks.html', consultation=consultation, conversation=new_conv)
 
-
-@app.route('/consult_doctor/doctor/<int:doctor_id>/consultation/<int:consultation_id>', methods=['GET', 'POST'])
-@login_required
-def consult_doctor(doctor_id, consultation_id):
-    """Allows a doctor to view and respond to a specific consultation."""
 
 ### ----------------------------------------------------------------- ###
 # --- Consultation Routes ---
@@ -368,7 +404,7 @@ def format_consultation_data(consultation_id):
     
     # Format the consultation data for display
     consultation_text = f"""
-    New Consultation Request Submitted (ID: {new_consultation.id}), 
+    Consultation (ID: {new_consultation.id})   , 
     --- 1. Personal Information and Main Complaint ---
     - Full Name: {new_consultation.full_name}
     - Age: {new_consultation.age}
