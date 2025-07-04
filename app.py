@@ -264,6 +264,138 @@ def ask_medical_bot(user_input):
         print(f"[GPT Error] {e}")
         return "Sorry, something went wrong while generating a response. Please try again."
 
+### --- Medical Consultation Form Routes --- ###
+
+# 1. Display the medical consultation form (questions.html)
+@app.route('/consultation')
+@login_required  
+def consultation_form():
+    """Renders the medical consultation form page."""
+    return render_template('question.html')
+
+# 2. Handle form submission and send the data via email
+@app.route('/submit-consultation', methods=['POST'])
+@login_required 
+
+def submit_consultation():
+    """Handles form submission, saves it to the database, and then sends the data via email."""
+    if request.method == 'POST':
+        form_data = request.form
+
+        # create a new Consultation object with the form data
+        new_consultation = Consultation(
+            user_id=current_user.id,
+            full_name=form_data.get('full_name'),
+            age=form_data.get('age'),
+            gender=form_data.get('gender'),
+            main_complaint=form_data.get('main_complaint'),
+            onset=form_data.get('onset'),
+            location=form_data.get('location'),
+            character=form_data.get('character'),
+            duration=form_data.get('duration'),
+            aggravating_factors=form_data.get('aggravating'),
+            alleviating_factors=form_data.get('alleviating'),
+            related_symptoms=form_data.get('related_symptoms'),
+            severity=form_data.get('severity'),
+            chronic_diseases=", ".join(form_data.getlist('chronic_diseases')), # Handle list
+            current_medications=form_data.get('medications'),
+            allergies=form_data.get('allergies'),
+            previous_surgeries=form_data.get('surgeries'),
+            smoking_status=form_data.get('smoking')
+        )
+        
+        try:
+            db.session.add(new_consultation)
+            db.session.commit()
+
+            # Crate the email subject using the new_consultation object
+            subject = f"Consultation Request #{new_consultation.id} from: {new_consultation.full_name}"
+            
+            email_body = f"""
+            New Consultation Request Submitted (ID: {new_consultation.id}), 
+            --- 1. Personal Information and Main Complaint ---
+            - Full Name: {new_consultation.full_name}
+            - Age: {new_consultation.age}
+            - Gender: {new_consultation.gender}
+            - Main Complaint: {new_consultation.main_complaint}
+
+            --- 2. Current Symptoms Details ---
+            - Onset: {new_consultation.onset}
+            - Location: {new_consultation.location}
+            - Character: {new_consultation.character}
+            - Duration: {new_consultation.duration}
+            - Aggravating Factors: {new_consultation.aggravating_factors}
+            - Alleviating Factors: {new_consultation.alleviating_factors}
+            - Related Symptoms: {new_consultation.related_symptoms}
+            - Severity (1-10): {new_consultation.severity}
+
+            --- 3. Medical History ---
+            - Chronic Diseases: {new_consultation.chronic_diseases}
+            - Current Medications: {new_consultation.current_medications}
+            - Allergies: {new_consultation.allergies}
+            - Previous Surgeries: {new_consultation.previous_surgeries}
+
+            --- 4. Lifestyle ---
+            - Smoking Status: {new_consultation.smoking_status}
+
+            --- End of Report ---
+            """
+
+            msg = EmailMessage()
+            msg.set_content(email_body)
+            msg['Subject'] = subject
+            msg['From'] = 'Clear Diagnosis System <no-reply@yourdomain.com>' # يمكنك وضع أي بريد هنا
+            msg['To'] = app.config['ADMIN_EMAIL'] # يفترض أن لديك هذا المتغير في config.py
+            # --- 3. Send Email ---
+            msg = Message(
+                subject,
+                sender=('Clear Diagnosis System', app.config['MAIL_USERNAME']),
+                recipients=[app.config['ADMIN_EMAIL']] # Send to admin email
+            )
+            msg.body = email_body
+
+            # send using smtplib
+            # settings get from (localhost:1025)
+            with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as s:
+                s.send_message(msg)
+
+            flash('Form submitted and saved successfully!', 'success')
+            return redirect(url_for('thank_you'))
+
+        except Exception as e:
+            db.session.rollback() # Rollback the session in case of failure
+            flash(f'An error occurred: {e}', 'danger')
+            return redirect(url_for('consultation_form'))
+
+    return redirect(url_for('consultation_form'))
+
+# 3. Route for the thank you page after successful submission
+@app.route('/thank-you')
+def thank_you():
+    """Displays a thank you page after successful form submission."""
+    return render_template('thanks.html') # It's better to create a simple thank you page
+
+### ----------------------------------------------------------------- ###
+# --- Consultation Routes ---
+@app.route('/my_consultations')
+@login_required
+def my_consultations():
+    """Display a list of all consultations submitted by the current user."""
+    # Query consultations for the logged-in user, newest first
+    consultations = Consultation.query.filter_by(user_id=current_user.id).order_by(Consultation.timestamp.desc()).all()
+    return render_template('my_consultations.html', consultations=consultations)
+
+@app.route('/consultation_details/<int:consultation_id>')
+@login_required
+def consultation_details(consultation_id):
+    """Display the full details of a specific consultation."""
+    consultation = Consultation.query.get_or_404(consultation_id)
+    # Security check: ensure the user owns this consultation
+    if consultation.user_id != current_user.id:
+        from flask import abort
+        abort(403) # Forbidden
+    return render_template('consultation_details.html', consultation=consultation)
+
 # Dynamic routes for AJAX requests
 @app.route('/chatmessage/<int:conversation_id>')
 @login_required

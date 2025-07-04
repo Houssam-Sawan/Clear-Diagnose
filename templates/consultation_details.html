@@ -1,0 +1,46 @@
+<!-- templates/consultation_details.html -->
+{% extends "base.html" %}
+
+{% block title %}Consultation #{{ consultation.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h4>Consultation Details - #{{ consultation.id }}</h4>
+            <small>Submitted on: {{ consultation.timestamp.strftime('%Y-%m-%d') }}</small>
+        </div>
+        <div class="card-body">
+            <h5>Personal Information</h5>
+            <ul>
+                <li><strong>Full Name:</strong> {{ consultation.full_name }}</li>
+                <li><strong>Age:</strong> {{ consultation.age }}</li>
+                <li><strong>Gender:</strong> {{ consultation.gender }}</li>
+            </ul>
+            <hr>
+            <h5>Main Complaint</h5>
+            <p>{{ consultation.main_complaint }}</p>
+            <hr>
+            
+            <h5>Symptoms Details</h5>
+            <ul>
+                <li><strong>Onset:</strong> {{ consultation.onset }}</li>
+                <li><strong>Location:</strong> {{ consultation.location }}</li>
+                <li><strong>Severity (1-10):</strong> {{ consultation.severity }}</li>
+                <!-- Add other symptom fields as needed -->
+            </ul>
+            <hr>
+
+            <h5>Medical History</h5>
+            <ul>
+                <li><strong>Chronic Diseases:</strong> {{ consultation.chronic_diseases }}</li>
+                <li><strong>Current Medications:</strong> {{ consultation.current_medications }}</li>
+                <li><strong>Allergies:</strong> {{ consultation.allergies }}</li>
+            </ul>
+            <hr>
+            
+            <a href="{{ url_for('my_consultations') }}" class="btn btn-primary">Back to List</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

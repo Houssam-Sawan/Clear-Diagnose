@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Thank you</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/questions.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .thank-you-container {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .thank-you-container h1 {
+            color: #28a745; /* Green color for success */
+            margin-bottom: 20px;
+        }
+        .thank-you-container p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .thank-you-container a {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="thank-you-container">
+            <h1>Your consultation has been submitted </h1>
+            <p>
+              Thank you. We have received your information and it will be reviewed by a specialist doctor as soon as possible. 
+              <br>
+              You will be notified when the response arrives.            
+            </p>
+            <a href="{{ url_for('home') }}">Return to Home Page</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!-- templates/my_consultations.html -->
+{% extends "base.html" %} <!-- Or your base template -->
+
+{% block title %}My Consultations{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>My Previous Consultations</h2>
+    <hr>
+    {% if consultations %}
+        <div class="list-group">
+            {% for consultation in consultations %}
+                <a href="{{ url_for('consultation_details', consultation_id=consultation.id) }}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Complaint: {{ consultation.main_complaint[:60] }}...</h5>
+                        <small>{{ consultation.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <p class="mb-1">Status: Submitted</p>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            You have not submitted any consultations yet. <a href="{{ url_for('consultation_form') }}">Submit one now</a>.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
