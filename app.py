@@ -84,7 +84,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.password_hash == password:  # Assuming password is stored in plain text for simplicity
             login_user(user)
-            return redirect(url_for('chat', Conversation_id=0), user=current_user)
+            return redirect(url_for('dashboard'))
         flash('Invalid username or password.')
     return render_template("login.html")
 
@@ -102,7 +102,7 @@ def signup():
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            return redirect(url_for('chat', Conversation_id=0))
+            return redirect(url_for('dashboard'))
     return render_template('signup.html')
 
 @app.route("/logout")
