@@ -4,3 +4,6 @@ __pycache__/*
 instance/*
 instance/app.db
 .env
+__pycache__/app.cpython-39.pyc
+__pycache__/app.cpython-310.pyc
+__pycache__/models.cpython-39.pyc

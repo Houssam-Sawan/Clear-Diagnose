@@ -111,3 +111,43 @@ class Message(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     sender = db.relationship('User')
+
+
+class Consultation(db.Model):
+    __tablename__ = 'consultations'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    
+    # --- Personal Information ---
+    full_name = db.Column(db.String(150), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    gender = db.Column(db.String(50))
+    main_complaint = db.Column(db.Text, nullable=False)
+    
+    # --- Symptoms Details ---
+    onset = db.Column(db.Text)
+    location = db.Column(db.Text)
+    character = db.Column(db.Text)
+    duration = db.Column(db.Text)
+    aggravating_factors = db.Column(db.Text)
+    alleviating_factors = db.Column(db.Text)
+    related_symptoms = db.Column(db.Text)
+    severity = db.Column(db.Integer)
+    
+    # --- Medical History ---
+    chronic_diseases = db.Column(db.Text)
+    current_medications = db.Column(db.Text)
+    allergies = db.Column(db.Text)
+    previous_surgeries = db.Column(db.Text)
+    
+    # --- Lifestyle ---
+    smoking_status = db.Column(db.String(100))
+    
+    # --- Relationship to User ---
+    user = db.relationship('User', backref=db.backref('consultations', lazy=True))
+    doctor = db.relationship('Doctor', backref=db.backref('consultations', lazy=True))
+
+    def __repr__(self):
+        return f'<Consultation {self.id} by User {self.user_id}>'

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Thank you</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/questions.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .thank-you-container {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .thank-you-container h1 {
+            color: #28a745; /* Green color for success */
+            margin-bottom: 20px;
+        }
+        .thank-you-container p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .thank-you-container a {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <div class="thank-you-container">
+            <h1>Your consultation has been submitted </h1>
+            <p>
+              Thank you. We have received your information and created a new chat entry in your dashboard. 
+              <br>
+              you can View your consultation details in the dashboard.         
+            </p>
+            {% if consultation %}
+                {% if consultation.doctor_id %}
+                <p>
+                    Your consultation has been assigned to Dr. {{ consultation.doctor.name }}.
+                    <a href="{{ url_for('chat',conversation_id=conevrsation_id, doctor_id=consultation.doctor_id) }}'">Continue to the Doctor Conversation </a>
+                </p>
+                {% else %}
+                <p>
+                    Ask our Medical Assistant
+                    <a href="{{ url_for('chat', conversation_id=conversation.id) }}">Continue to the Medical Assistant Conversation </a>
+                </p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>
