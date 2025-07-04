@@ -387,6 +387,10 @@ def my_consultations():
     doctors = db.session.query(User).join(Doctor).filter(User.role == 'doctor').all()
     return render_template('my_consultations.html', consultations=consultations, doctors=doctors)
 
+@app.route('/contact' , methods=['GET', 'POST'])
+def contact():
+    return render_template('contact.html')
+
 @app.route('/consultation_details/<int:consultation_id>')
 @login_required
 def consultation_details(consultation_id):

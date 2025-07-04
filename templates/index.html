@@ -38,7 +38,7 @@
                 <h6>Welcome to Clear Diagnose</h6>
                 <h2>Your  <em>Smart Medical Assistant</em> </h2>
                 <p>Get quick medical diagnoses and advice with the power of AI. Start your diagnosis now</p>
-                <li class="scroll-to-section"><div class="main-red-button"><a href="{{ url_for('login') }}">Start Your Diagnosis
+                <li class="scroll-to-section"><div class="main-red-button"><a href="{{ url_for('consultation_form') }}">Start Your Diagnosis
 
 
 
@@ -302,7 +302,7 @@
       <div class="row">
         <div class="col-lg-6 align-self-center wow fadeInLeft" data-wow-duration="0.5s" data-wow-delay="0.25s">
           <div class="section-heading">
-            <h2>Feel Free To Send Us a Message About Your Website Needs</h2>
+            <h2>Feel Free To Send Us a Message</h2>
             <p>Have questions, suggestions, or need assistance? Don’t hesitate to reach out to us through the channels below. Our team is ready to help with care and dedication! </p>
             <div class="phone-info">
               <h4>For any enquiry, Call Us: <span><i class="fa fa-phone"></i> <a href="#">+971 123 456 7890</a></span></h4>
@@ -310,7 +310,7 @@
           </div>
         </div>
         <div class="col-lg-6 wow fadeInRight" data-wow-duration="0.5s" data-wow-delay="0.25s">
-          <form id="contact" action="" method="post">
+          <form id="contact" action="{{url_for('contact')}}" method="post">
             <div class="row">
               <div class="col-lg-6">
                 <fieldset>
