@@ -41,7 +41,7 @@
                 {% if consultation.doctor_id %}
                 <p>
                     Your consultation has been assigned to Dr. {{ consultation.doctor.name }}.
-                    <a href="{{ url_for('chat',conversation_id=conevrsation_id, doctor_id=consultation.doctor_id) }}'">Continue to the Doctor Conversation </a>
+                    <a href="{{ url_for('chat', conversation_id=conversation.id, doctor_id=consultation.doctor_id) }}">Continue to the Doctor Conversation </a>
                 </p>
                 {% else %}
                 <p>
