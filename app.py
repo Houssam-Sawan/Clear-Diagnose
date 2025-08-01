@@ -115,6 +115,11 @@ def logout():
 def dashboard():
     conversations = Conversation.query.filter_by(user_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
     doctors = db.session.query(User).join(Doctor).filter(User.role == 'doctor').all()
+    doctor_conversations = Conversation.query.filter_by(doctor_id=current_user.id).order_by(Conversation.timestamp.desc()).all()
+    
+    if current_user.role == 'doctor':
+        # If the user is a doctor, show their conversations with patients
+        conversations = doctor_conversations
     return render_template('dashboard.html', conversations=conversations, doctors=doctors, user=current_user)
 
 @app.route('/new_chat', defaults={'doctor_id': None}, methods=['GET', 'POST'])
@@ -331,7 +336,7 @@ def submit_consultation():
 
             # redirect to the thank you page after successful submission
             flash('Form submitted and saved successfully!', 'success')
-            return redirect(url_for('thank_you'), consultation_id=new_consultation.id)
+            return redirect(url_for('thank_you', consultation_id=new_consultation.id))
 
         except Exception as e:
             db.session.rollback() # Rollback the session in case of failure
